@@ -12,7 +12,7 @@ body {
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  background-color: #dddddd;
+  background-color: #30475e;
   font-family: "Barlow Condensed", sans-serif;
 }
 
@@ -69,20 +69,22 @@ body {
   height: 100%;
   margin: 0 auto;
   background-color: #222831;
-  transition: all 0.3s ease-in-out;
-}
-
-.nav ul li a {
-  text-decoration: none;
   color: #f05454;
 }
 
-.nav ul li:hover {
-  background-color: #30475e;
+.nav ul li a {
+  text-decoration: underline 0.15em rgba(255, 255, 255, 0);
+  transition: text-decoration-color 300ms;
+  color: #f05454;
+}
+
+.nav ul li a:hover {
+  cursor: pointer;
+  text-decoration-color: #f05454;
 }
 
 .content {
-  background-color: #dddddd;
+  background-color: #30475e;
   height: 90%;
   width: 100%;
 }
@@ -97,9 +99,9 @@ body {
   height: 200px;
   margin: 0 auto;
   border-radius: 15px;
-  background-color: #30475e;
+  background-color: #dddddd;
   transition: all 0.3s ease-in-out;
-  color: #dddddd;
+  color: #222831;
 }
 .content #items ul li .item .info {
   display: flex;
@@ -146,7 +148,7 @@ body {
   flex-wrap: wrap;
   list-style: none;
   list-style-type: none !important;
-  margin: 20px;
+  margin: 0 20px;
 }
 
 /* Style a span with is total, that represents the number of total items in the cart */
@@ -160,7 +162,7 @@ body {
   margin: 0 auto;
   border-radius: 100%;
   background-color: #f05454;
-  color: #dddddd;
+  color: #222831;
   position: relative;
   left: -12px;
   top: -11px;
