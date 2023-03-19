@@ -1,4 +1,4 @@
-import { shopping } from "./shopping.js";
+import { shopping } from "../data/shopping.js";
 
 showItems();
 
@@ -8,11 +8,21 @@ function cartTotalItems() {
   //find the element with id "total" and set its innerHTML to the number of items in the cart
 }
 
+function showCart() {
+  cartTotalItems();
+  console.log(shopping.cart);
+}
+
+function addToCart(item) {
+  shopping.cart.push(item);
+  showCart();
+}
+
 function showItems() {
   //create a list of items to be displayed  on the page, each item with class "item"
   const list = document.createElement("ul");
   //add each item to the list
-  shopping.cart.forEach((item) => {
+  shopping.itens.forEach((item) => {
     const li = document.createElement("li");
     const div = itemComponent(item);
     li.appendChild(div);
@@ -41,10 +51,10 @@ function itemComponent(item) {
 
   //create another div to append the button
   const div2 = document.createElement("div");
-  div2.className = "remove-button";
+  div2.className = "button";
   //add a button to the item
   const button = document.createElement("button");
-  button.innerHTML = "Remove from cart";
+  button.innerHTML = "Add to cart";
   button.addEventListener("click", () => addToCart(item));
   div2.appendChild(button);
   div.appendChild(div2);

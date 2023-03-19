@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="../style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -14,6 +14,8 @@
     <title>3D shopping</title>
   </head>
   <body>
+    <canvas id="background"></canvas>
+
     <div class="container">
       <div class="header">
         <div class="logo">
@@ -35,6 +37,9 @@
         <div id="items"></div>
       </div>
     </div>
-    <script type="module" src="./cart.js"></script>
+    <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
+    <script src="https://webgl2fundamentals.org/webgl/resources/m4.js"></script>
+    <script type="module" src="../scripts/bg3d2.js"></script>
+    <script type="module" src="../scripts/cart.js"></script>
   </body>
 </html>
