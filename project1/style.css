@@ -140,6 +140,29 @@ body {
   width: 100%;
 }
 
+.content #items ul li .item .remove-button button {
+  width: 100%;
+  height: 50px;
+  background-color: #222831;
+  color: #f05454;
+  border: none;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  transition: all 0.2s ease-in-out;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.content #items ul li .item .remove-button button:hover {
+  background-color: #f05454;
+  cursor: pointer;
+  color: #222831;
+}
+
+.content #items ul li .item .remove-button {
+  width: 100%;
+}
+
 .content #items ul {
   display: flex;
   flex-direction: row;
