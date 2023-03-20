@@ -28,19 +28,6 @@ export const shopping = {
       name: "Apple",
       price: 2.99,
     },
-    {
-      name: "Apple",
-      price: 2.99,
-    },
-    {
-      name: "Apple",
-      price: 2.99,
-    },
   ],
-  cart: [
-    {
-      name: "Apple",
-      price: 2.99,
-    },
-  ],
+  cart: [],
 };

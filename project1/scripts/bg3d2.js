@@ -288,12 +288,13 @@ function setGeometry(gl) {
 
 // Fill the current ARRAY_BUFFER buffer with colors for the 'F'.
 function setColors(gl) {
-  var r1 = 49;
-  var g1 = 71;
-  var b1 = 94;
-  var r2 = r1;
-  var g2 = g1;
-  var b2 = b1;
+  var r1 = 240;
+  var g1 = 86;
+  var b1 = 86;
+  var r2 = 240;
+  var g2 = 86;
+  var b2 = 86;
+  // 240, 86, 86
 
   gl.bufferData(
     gl.ARRAY_BUFFER,

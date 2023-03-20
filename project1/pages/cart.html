@@ -4,12 +4,16 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../css/style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Barlow+Condensed&display=swap"
       rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="../libraries/font-awesome-4.7.0/css/font-awesome.min.css"
     />
     <title>3D shopping</title>
   </head>
@@ -24,10 +28,14 @@
         <div class="nav">
           <ul>
             <li><a href="./index.html">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
+            <li><a href="./about.html">About</a></li>
+            <li><a href="./contact.html">Contact</a></li>
             <li>
-              <a href="./cart.html">Cart</a
+              <a href="./cart.html"
+                ><i
+                  class="fa fa-shopping-cart fa-lg cart"
+                  aria-hidden="true"
+                ></i></a
               ><span id="total" class="total">0</span>
             </li>
           </ul>
@@ -35,6 +43,13 @@
       </div>
       <div class="content">
         <div id="items"></div>
+        <footer>
+          <div class="copyright">
+            <small>
+              Copyright © Lucas Simões Ferreira | lcsferreira@inf.ufpel.edu.br
+            </small>
+          </div>
+        </footer>
       </div>
     </div>
     <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
