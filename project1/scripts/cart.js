@@ -1,18 +1,26 @@
 import { shopping } from "../data/shopping.js";
 
+cartTotalItems();
 showItems();
 
 function cartTotalItems() {
   const total = document.getElementById("total");
-  total.innerHTML = shopping.cart.length;
+
+  //get the cart from the localstorage
+  const cart = JSON.parse(localStorage.getItem("cart"));
+
+  total.innerHTML = cart.length;
   //find the element with id "total" and set its innerHTML to the number of items in the cart
 }
 
 function showItems() {
   //create a list of items to be displayed  on the page, each item with class "item"
   const list = document.createElement("ul");
+
+  //get the cart from the localstorage
+  const cart = JSON.parse(localStorage.getItem("cart"));
   //add each item to the list
-  shopping.cart.forEach((item) => {
+  cart.forEach((item) => {
     const li = document.createElement("li");
     const div = itemComponent(item);
     li.appendChild(div);
@@ -20,6 +28,26 @@ function showItems() {
   });
   //add the list to the page in the div with id "items"
   document.getElementById("items").appendChild(list);
+  cartTotalItems();
+}
+
+function removeItem(name, price) {
+  //get the cart from localstorage
+  const cart = JSON.parse(localStorage.getItem("cart"));
+  let indexRemove;
+  //find the item in the cart and pop it
+  cart.forEach((element, index) => {
+    if (element.name === name && element.price === price) {
+      indexRemove = index;
+    }
+  });
+
+  console.log(indexRemove);
+  const filteredCart = cart.filter((item, index) => index !== indexRemove);
+  //save the cart to localstorage
+  localStorage.setItem("cart", JSON.stringify(filteredCart));
+  //reload page
+  location.reload();
 }
 
 function itemComponent(item) {
@@ -45,7 +73,7 @@ function itemComponent(item) {
   //add a button to the item
   const button = document.createElement("button");
   button.innerHTML = "Remove from cart";
-  button.addEventListener("click", () => addToCart(item));
+  button.addEventListener("click", () => removeItem(item.name, item.price));
   div2.appendChild(button);
   div.appendChild(div2);
   //add the item to the cart when clicked

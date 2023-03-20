@@ -1,21 +1,32 @@
 import { shopping } from "../data/shopping.js";
 
 showItems();
+cartTotalItems();
 
 function cartTotalItems() {
   const total = document.getElementById("total");
-  total.innerHTML = shopping.cart.length;
+
+  //get the cart from the localstorage
+  const cart = JSON.parse(localStorage.getItem("cart"));
+  //get the number of items in the cart
+
+  total.innerHTML = cart.length;
   //find the element with id "total" and set its innerHTML to the number of items in the cart
 }
 
-function showCart() {
-  cartTotalItems();
-  console.log(shopping.cart);
-}
-
 function addToCart(item) {
-  shopping.cart.push(item);
-  showCart();
+  //create a localstorage item called "cart" if it doesn't exist
+  if (!localStorage.getItem("cart")) {
+    localStorage.setItem("cart", JSON.stringify([]));
+  }
+  //get the cart from localstorage
+  const cart = JSON.parse(localStorage.getItem("cart"));
+  //add the item to the cart
+  cart.push(item);
+  //save the cart to localstorage
+  localStorage.setItem("cart", JSON.stringify(cart));
+  //update the cart total items
+  cartTotalItems();
 }
 
 function showItems() {

@@ -5,12 +5,6 @@
   --highlight: rgb(240, 86, 86);
 
   --font-family: "Barlow Condensed", sans-serif;
-
-  --bg-gradient: linear-gradient(
-    to bottom,
-    hsl(var(--hue), 95%, 99%),
-    hsl(var(--hue), 95%, 84%)
-  );
 }
 
 html {
@@ -72,15 +66,54 @@ footer {
   align-items: center;
   justify-content: space-evenly;
   width: 100%;
-  height: 100%;
+  height: 75% !important;
   margin: 0 auto;
+}
+
+.infos p {
+  color: var(--dark-color);
+  font-size: 22px;
+}
+
+.link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--base);
+  border-radius: 15px;
+  height: 50px;
+  width: 130px;
+  justify-content: center;
+  margin-top: 20px;
+  transition: all 0.2s ease-in-out;
+}
+
+#items {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.link:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px var(--dark-color);
+}
+
+.infos p a {
+  color: var(--highlight);
+  text-decoration: none;
+}
+
+.infos h2 {
+  color: var(--base);
+  font-size: 32px;
 }
 
 .column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
   width: 50%;
   height: 100%;
   margin: 0 auto;
