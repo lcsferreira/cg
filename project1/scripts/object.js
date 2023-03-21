@@ -174,7 +174,8 @@ async function main() {
 
     // compute the world matrix once since all parts
     // are at the same space.
-    let u_world = m4.yRotation(45);
+    //if canvas is hovered, rotate the object
+    var u_world = m4.yRotation(45);
     u_world = m4.translate(u_world, ...objOffset);
 
     for (const { bufferInfo, vao, material } of parts) {
