@@ -5,6 +5,10 @@ cartTotalItems();
 
 function cartTotalItems() {
   const total = document.getElementById("total");
+  //if there is no cart in the localstorage, set the number of items in the cart to 0
+  if (!localStorage.getItem("cart")) {
+    localStorage.setItem("cart", JSON.stringify([]));
+  }
 
   //get the cart from the localstorage
   const cart = JSON.parse(localStorage.getItem("cart"));
@@ -47,6 +51,17 @@ function itemComponent(item) {
   //create a div to append the name and the price of the item
   const div = document.createElement("div");
   div.className = "item";
+
+  //create a div to append a canvas with id "object"
+  const div0 = document.createElement("div");
+  div0.className = "object";
+  //add a canvas to the item
+  const canvas = document.createElement("canvas");
+  canvas.id = "object";
+  canvas.width = 300;
+  canvas.height = 200;
+  div0.appendChild(canvas);
+  div.appendChild(div0);
 
   const div1 = document.createElement("div");
   div1.className = "info";
