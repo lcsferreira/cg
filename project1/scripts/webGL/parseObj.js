@@ -74,6 +74,7 @@ export default function parseOBJ(text) {
 
   const keywords = {
     v(parts) {
+      // if there are more than 3 values here they are vertex colors
       if (parts.length > 3) {
         objPositions.push(parts.slice(0, 3).map(parseFloat));
         objColors.push(parts.slice(3).map(parseFloat));

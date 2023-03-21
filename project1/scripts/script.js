@@ -37,9 +37,9 @@ function showItems() {
   //create a list of items to be displayed  on the page, each item with class "item"
   const list = document.createElement("ul");
   //add each item to the list
-  shopping.itens.forEach((item) => {
+  shopping.itens.forEach((item, i) => {
     const li = document.createElement("li");
-    const div = itemComponent(item);
+    const div = itemComponent(item, i);
     li.appendChild(div);
     list.appendChild(li);
   });
@@ -47,7 +47,7 @@ function showItems() {
   document.getElementById("items").appendChild(list);
 }
 
-function itemComponent(item) {
+function itemComponent(item, index) {
   //create a div to append the name and the price of the item
   const div = document.createElement("div");
   div.className = "item";
@@ -57,7 +57,7 @@ function itemComponent(item) {
   div0.className = "object";
   //add a canvas to the item
   const canvas = document.createElement("canvas");
-  canvas.id = "object";
+  canvas.id = "object" + index;
   canvas.width = 300;
   canvas.height = 200;
   div0.appendChild(canvas);
