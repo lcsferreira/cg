@@ -1,7 +1,14 @@
 import { shopping } from "../data/shopping.js";
 import { scale3D } from "../scripts/webGL/scale3d.js";
+import { loadObj } from "../scripts/webGL/loadObj.js";
 
+const objFiles = [
+  "../../project1/objects/thermos/termos.obj",
+  "../../project1/objects/mugBlack/mugblack.obj",
+  "../../project1/objects/mugRed/mug.obj",
+];
 showItems();
+showObjs();
 cartTotalItems();
 
 function cartTotalItems() {
@@ -17,6 +24,13 @@ function cartTotalItems() {
 
   total.innerHTML = cart.length;
   //find the element with id "total" and set its innerHTML to the number of items in the cart
+}
+
+function showObjs() {
+  objFiles.forEach((objFile, index) => {
+    const canvasId = "objectTex" + index;
+    loadObj(objFile, canvasId);
+  });
 }
 
 function addToCart(item) {
@@ -41,6 +55,13 @@ function showItems() {
   shopping.itens.forEach((item, i) => {
     const li = document.createElement("li");
     const div = itemComponent(item, i);
+    li.appendChild(div);
+    list.appendChild(li);
+  });
+
+  objFiles.forEach((objFile, i) => {
+    const li = document.createElement("li");
+    const div = itemComponentObj(objFile, i);
     li.appendChild(div);
     list.appendChild(li);
   });
@@ -112,6 +133,48 @@ function visualize3D() {
 
   //call the function to display the 3D model
   scale3D();
+}
+
+function itemComponentObj(item, index) {
+  //create a div to append the name and the price of the item
+  const div = document.createElement("div");
+  div.className = "item";
+
+  //create a div to append a canvas with id "object"
+  const div0 = document.createElement("div");
+  div0.className = "object";
+  //add a canvas to the item
+  const canvas = document.createElement("canvas");
+  canvas.addEventListener("click", () => visualize3D());
+  canvas.id = "objectTex" + index;
+  canvas.width = 300;
+  canvas.height = 200;
+  div0.appendChild(canvas);
+  div.appendChild(div0);
+
+  const div1 = document.createElement("div");
+  div1.className = "info";
+  //add a name to the item
+  const name = document.createElement("p");
+  name.innerHTML = item.name;
+  div1.appendChild(name);
+  //add a price to the item
+  const price = document.createElement("p");
+  price.innerHTML = item.price;
+  div1.appendChild(price);
+  div.appendChild(div1);
+
+  //create another div to append the button
+  const div2 = document.createElement("div");
+  div2.className = "button";
+  //add a button to the item
+  const button = document.createElement("button");
+  button.innerHTML = "Add to cart";
+  button.addEventListener("click", () => addToCart(item));
+  div2.appendChild(button);
+  div.appendChild(div2);
+  //add the item to the cart when clicked
+  return div;
 }
 
 function itemComponent(item, index) {
