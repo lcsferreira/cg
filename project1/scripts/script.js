@@ -1,4 +1,5 @@
 import { shopping } from "../data/shopping.js";
+import { scale3D } from "../scripts/webGL/scale3d.js";
 
 showItems();
 cartTotalItems();
@@ -47,6 +48,72 @@ function showItems() {
   document.getElementById("items").appendChild(list);
 }
 
+function visualize3D() {
+  //create a modal to display the 3D model
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  //create a button to close the modal
+  const button = document.createElement("button");
+  button.innerHTML = "X";
+  button.addEventListener("click", () => modal.remove());
+  //add the button to the modal
+  modal.appendChild(button);
+  //add the modal to the page
+  document.body.appendChild(modal);
+  //create a canvas to display the 3D model
+  const canvas = document.createElement("canvas");
+  canvas.width = 400;
+  canvas.height = 400;
+  canvas.id = "canvas";
+  //add the canvas to the modal
+  //add another div to display the name and the price of the item
+  const div = document.createElement("div");
+  div.className = "item";
+  //add the name of the item
+
+  div.appendChild(canvas);
+
+  const uiContainer = document.createElement("div");
+  uiContainer.id = "uiContainer";
+  const ui = document.createElement("div");
+  ui.id = "ui";
+  const x = document.createElement("div");
+  x.id = "x";
+  ui.appendChild(x);
+  const y = document.createElement("div");
+  y.id = "y";
+  ui.appendChild(y);
+  const z = document.createElement("div");
+  z.id = "z";
+  ui.appendChild(z);
+  const angleX = document.createElement("div");
+
+  angleX.id = "angleX";
+  ui.appendChild(angleX);
+  const angleY = document.createElement("div");
+  angleY.id = "angleY";
+  ui.appendChild(angleY);
+  const angleZ = document.createElement("div");
+  angleZ.id = "angleZ";
+  ui.appendChild(angleZ);
+  const scaleX = document.createElement("div");
+  scaleX.id = "scaleX";
+  ui.appendChild(scaleX);
+  const scaleY = document.createElement("div");
+  scaleY.id = "scaleY";
+  ui.appendChild(scaleY);
+  const scaleZ = document.createElement("div");
+  scaleZ.id = "scaleZ";
+  ui.appendChild(scaleZ);
+  uiContainer.appendChild(ui);
+  div.appendChild(uiContainer);
+  //add the div to the modal
+  modal.appendChild(div);
+
+  //call the function to display the 3D model
+  scale3D();
+}
+
 function itemComponent(item, index) {
   //create a div to append the name and the price of the item
   const div = document.createElement("div");
@@ -57,6 +124,7 @@ function itemComponent(item, index) {
   div0.className = "object";
   //add a canvas to the item
   const canvas = document.createElement("canvas");
+  canvas.addEventListener("click", () => visualize3D());
   canvas.id = "object" + index;
   canvas.width = 300;
   canvas.height = 200;

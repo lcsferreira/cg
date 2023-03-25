@@ -4,46 +4,31 @@ import { setGeometry, setColors } from "./geometryColors.js";
 import { m4 } from "./m4.js";
 
 const vShader = `#version 300 es
-in vec4 a_position;
-in vec3 a_normal;
+  in vec4 a_position;
+  uniform mat4 u_matrix;
 
-uniform mat4 u_projection;
-uniform mat4 u_view;
-uniform mat4 u_world;
-
-out vec3 v_normal;
-
-void main() {
-  gl_Position = u_projection * u_view * u_world * a_position;
-  v_normal = mat3(u_world) * a_normal;
-}
+  in vec4 a_color;
+  out vec4 v_color;
+  
+  void main() {
+    gl_Position = u_matrix * a_position;
+    v_color = a_color;
+  }
 `;
 
 const fShader = `#version 300 es
-precision highp float;
+    precision highp float;
+    
+    in vec4 v_color;
+    out vec4 outColor;
 
-in vec3 v_normal;
-
-uniform vec4 u_diffuse;
-uniform vec3 u_lightDirection;
-
-out vec4 outColor;
-
-void main () {
-  vec3 normal = normalize(v_normal);
-  float fakeLight = dot(u_lightDirection, normal) * .5 + .5;
-  outColor = vec4(u_diffuse.rgb * fakeLight, u_diffuse.a);
-}
+    void main() {
+      outColor = v_color;
+    }
     `;
 
 const number_objs = shopping.itens.length;
 const NUMBER_OBJS = number_objs;
-
-var objectFiles = [
-  "../../../project1/objects/thermos/termos.obj",
-  "../../../project1/objects/mugRed/mug.obj",
-  "../../../project1/objects/mugBlack/mugblack.obj",
-];
 
 var cardShapes; // html: webgl
 
@@ -60,44 +45,49 @@ function main(NUMBER_OBJS, shapes) {
   var gl;
   for (let i = 0; i < NUMBER_OBJS; ++i) {
     gl = getGLContext(`object${i}`);
-    twgl.setAttributePrefix("a_");
-    const meshProgramInfo = twgl.createProgramInfo(gl, [vShader, fShader]);
-    setWebGl(gl, meshProgramInfo, obj);
+    program = createProgram(gl, vShader, fShader);
+    setWebGl(gl, program);
     drawShape(gl, shapes, i);
   }
 
-  async function setWebGl(gl, meshProgramInfo, obj) {
-    const response = await fetch(obj);
-    const text = await response.text();
-    const obj = parseOBJ(text);
+  function setWebGl(gl, program) {
+    positionAttribLocation = gl.getAttribLocation(program, "a_position");
+    colorAttribLocation = gl.getAttribLocation(program, "a_color");
+    matrixLocation = gl.getUniformLocation(program, "u_matrix");
 
-    const parts = obj.geometries.map(({ data }) => {
-      // Because data is just named arrays like this
-      //
-      // {
-      //   position: [...],
-      //   texcoord: [...],
-      //   normal: [...],
-      // }
-      //
-      // and because those names match the attributes in our vertex
-      // shader we can pass it directly into `createBufferInfoFromArrays`
-      // from the article "less code more fun".
+    var positionBuffer = gl.createBuffer();
+    vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.enableVertexAttribArray(positionAttribLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    setGeometry(gl);
 
-      // create a buffer for each array by calling
-      // gl.createBuffer, gl.bindBuffer, gl.bufferData
-      const bufferInfo = twgl.createBufferInfoFromArrays(gl, data);
-      // fills out a vertex array by calling gl.createVertexArray, gl.bindVertexArray
-      // then gl.bindBuffer, gl.enableVertexAttribArray, and gl.vertexAttribPointer for each attribute
-      const vao = twgl.createVAOFromBufferInfo(gl, meshProgramInfo, bufferInfo);
-      return {
-        material: {
-          u_diffuse: [Math.random(), Math.random(), Math.random(), 1],
-        },
-        bufferInfo,
-        vao,
-      };
-    });
+    var size = 3; // 2 components per iteration
+    var type = gl.FLOAT; // the data is 32bit floats
+    var normalize = false; // don't normalize the data
+    var stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
+    var offset = 0; // start at the beginning of the buffer
+    gl.vertexAttribPointer(
+      positionAttribLocation,
+      size,
+      type,
+      normalize,
+      stride,
+      offset
+    );
+
+    var colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    setColors(gl);
+    gl.enableVertexAttribArray(colorAttribLocation);
+    gl.vertexAttribPointer(
+      colorAttribLocation,
+      3,
+      gl.UNSIGNED_BYTE,
+      true,
+      0,
+      0
+    );
   }
 
   //função para toacionar, mas n consigo chamar quando da o hover
@@ -223,10 +213,6 @@ function createProgram(gl, vertex, fragment) {
     gl.deleteShader(shader);
     return undefined;
   }
-}
-
-function radToDeg(r) {
-  return (r * 180) / Math.PI;
 }
 
 function degToRad(d) {
