@@ -1,5 +1,6 @@
 import { shopping } from "../data/shopping.js";
 import { scale3D } from "../scripts/webGL/scale3d.js";
+import { cameraCart } from "./webGL/cameraCart.js";
 
 cartTotalItems();
 showItems();
@@ -12,6 +13,17 @@ function cartTotalItems() {
 
   total.innerHTML = cart.length;
   //find the element with id "total" and set its innerHTML to the number of items in the cart
+}
+
+function showAllContent() {
+  consolse.log("showAllContent");
+  const cart = JSON.parse(localStorage.getItem("cart"));
+  const allContent = document.getElementById("full-content");
+  //remove the class "hidden" from the div with id "full-content"
+  allContent.classList.remove("hidden");
+  //call the function cameraCart from the file cameraCart.js
+
+  cameraCart(cart.length);
 }
 
 function showItems() {

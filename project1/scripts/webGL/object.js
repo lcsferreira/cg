@@ -66,54 +66,6 @@ function main(NUMBER_OBJS, shapes) {
       0
     );
   }
-
-  //função para toacionar, mas n consigo chamar quando da o hover
-  function drawScene(now) {
-    console.log(shapes[index]);
-    now *= 0.001;
-    deltaTime = now - then;
-    then = now;
-
-    shapes[index].rotation[0] += Math.sin(0.2 * deltaTime);
-    shapes[index].rotation[1] += 0.3 * deltaTime;
-
-    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-    gl.clearColor(0, 0, 0, 0); // Clear the canvas
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    gl.enable(gl.DEPTH_TEST);
-
-    gl.useProgram(program);
-    gl.bindVertexArray(vao);
-
-    var matrix = m4.projection(
-      gl.canvas.clientWidth,
-      gl.canvas.clientHeight,
-      500
-    );
-    matrix = m4.translate(
-      matrix,
-      shapes[index].translation[0],
-      shapes[index].translation[1],
-      shapes[index].translation[2]
-    );
-    matrix = m4.xRotate(matrix, shapes[index].rotation[0]);
-    matrix = m4.yRotate(matrix, shapes[index].rotation[1]);
-    matrix = m4.zRotate(matrix, shapes[index].rotation[2]);
-    matrix = m4.scale(
-      matrix,
-      shapes[index].scale[0],
-      shapes[index].scale[1],
-      shapes[index].scale[2]
-    );
-
-    gl.uniformMatrix4fv(matrixLocation, false, matrix);
-
-    gl.drawArrays(gl.TRIANGLES, 0, 12 * 3);
-
-    requestAnimationFrame(drawScene);
-  }
 }
 
 function drawShape(gl, shapes, index) {
@@ -207,7 +159,6 @@ function generateShapes(number, mult1, mult2) {
         degToRad(Math.random() * 75),
       ],
       scale: [0.2 * mult2, 0.2 * mult2, 0.2 * mult2],
-      // color: [Math.random(), Math.random(), Math.random(), 1],
       price: Math.round(Math.random() * 50),
     });
   }
