@@ -14,8 +14,6 @@ var vao = null;
 var colorAttribLocation = null;
 var positionAttribLocation = null;
 var matrixLocation = null;
-var then = 0;
-var deltaTime;
 
 function main(NUMBER_OBJS, shapes) {
   // cards shapes
@@ -153,13 +151,8 @@ function generateShapes(number, mult1, mult2) {
   for (let i = 0; i < number; ++i) {
     shapes.push({
       translation: [1 * mult1, 1 * mult1, 0],
-      rotation: [
-        degToRad(Math.random() * 75),
-        degToRad(Math.random() * 75),
-        degToRad(Math.random() * 75),
-      ],
+      rotation: [degToRad(15 * 75), degToRad(15 * 75), degToRad(15 * 75)],
       scale: [0.2 * mult2, 0.2 * mult2, 0.2 * mult2],
-      price: Math.round(Math.random() * 50),
     });
   }
   return shapes;

@@ -40,12 +40,12 @@ export function setGeometry(gl) {
 
 // Fill the current ARRAY_BUFFER buffer with colors for the 'F'.
 export function setColors(gl) {
-  var r1 = Math.random() * 255;
-  var r2 = Math.random() * 255;
-  var g1 = Math.random() * 255;
-  var g2 = Math.random() * 255;
-  var b1 = Math.random() * 255;
-  var b2 = Math.random() * 255;
+  var r1 = 1 * 255;
+  var r2 = 1 * 255;
+  var g1 = 0 * 255;
+  var g2 = 0 * 255;
+  var b1 = 1 * 255;
+  var b2 = 1 * 255;
 
   gl.bufferData(
     gl.ARRAY_BUFFER,

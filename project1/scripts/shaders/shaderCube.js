@@ -1,23 +1,37 @@
-export const vShader = `#version 300 es
-  in vec4 a_position;
-  uniform mat4 u_matrix;
+export const vertexShaderSource = `#version 300 es
 
-  in vec4 a_color;
-  out vec4 v_color;
-  
-  void main() {
-    gl_Position = u_matrix * a_position;
-    v_color = a_color;
-  }
+// an attribute is an input (in) to a vertex shader.
+// It will receive data from a buffer
+in vec4 a_position;
+in vec4 a_color;
+
+// A matrix to transform the positions by
+uniform mat4 u_matrix;
+
+// a varying the color to the fragment shader
+out vec4 v_color;
+
+// all shaders have a main function
+void main() {
+  // Multiply the position by the matrix.
+  gl_Position = u_matrix * a_position;
+
+  // Pass the color to the fragment shader.
+  v_color = a_color;
+}
 `;
 
-export const fShader = `#version 300 es
-    precision highp float;
-    
-    in vec4 v_color;
-    out vec4 outColor;
+export const fragmentShaderSource = `#version 300 es
 
-    void main() {
-      outColor = v_color;
-    }
-    `;
+precision highp float;
+
+// the varied color passed from the vertex shader
+in vec4 v_color;
+
+// we need to declare an output for the fragment shader
+out vec4 outColor;
+
+void main() {
+  outColor = v_color;
+}
+`;

@@ -1,50 +1,16 @@
 import { m4 } from "./m4.js";
 import { setGeometry, setColors } from "./geometryColors.js";
+import {
+  vertexShaderSource,
+  fragmentShaderSource,
+} from "../shaders/shaderCube.js";
 
 ("use strict");
 
-var vertexShaderSource = `#version 300 es
-
-// an attribute is an input (in) to a vertex shader.
-// It will receive data from a buffer
-in vec4 a_position;
-in vec4 a_color;
-
-// A matrix to transform the positions by
-uniform mat4 u_matrix;
-
-// a varying the color to the fragment shader
-out vec4 v_color;
-
-// all shaders have a main function
-void main() {
-  // Multiply the position by the matrix.
-  gl_Position = u_matrix * a_position;
-
-  // Pass the color to the fragment shader.
-  v_color = a_color;
-}
-`;
-
-var fragmentShaderSource = `#version 300 es
-
-precision highp float;
-
-// the varied color passed from the vertex shader
-in vec4 v_color;
-
-// we need to declare an output for the fragment shader
-out vec4 outColor;
-
-void main() {
-  outColor = v_color;
-}
-`;
-
-export function scale3D() {
+export function scale3D(canvasId, index) {
   // Get A WebGL context
   /** @type {HTMLCanvasElement} */
-  var canvas = document.querySelector("#canvas");
+  var canvas = document.getElementById(canvasId);
   var gl = canvas.getContext("webgl2");
   if (!gl) {
     return;
@@ -129,66 +95,36 @@ export function scale3D() {
 
   // First let's make some variables
   // to hold the translation,
-  var translation = [150, 230, 0];
-  var rotation = [degToRad(110), degToRad(25), degToRad(325)];
-  var scale = [0.5, 0.5, 0.5];
+  var translation = [125, 125, 0];
+  var rotation = [degToRad(45), degToRad(180), degToRad(45)];
+  var scale = [0.2, 0.2, 0.2];
 
   drawScene();
 
-  // Setup a ui.
-  webglLessonsUI.setupSlider("#x", {
+  webglLessonsUI.setupSlider("#x" + index, {
     value: translation[0],
     slide: updatePosition(0),
     max: gl.canvas.width,
   });
-  webglLessonsUI.setupSlider("#y", {
+  webglLessonsUI.setupSlider("#y" + index, {
     value: translation[1],
     slide: updatePosition(1),
     max: gl.canvas.height,
   });
-  webglLessonsUI.setupSlider("#z", {
-    value: translation[2],
-    slide: updatePosition(2),
-    max: gl.canvas.height,
-  });
-  webglLessonsUI.setupSlider("#angleX", {
+  webglLessonsUI.setupSlider("#angleX" + index, {
     value: radToDeg(rotation[0]),
     slide: updateRotation(0),
     max: 360,
   });
-  webglLessonsUI.setupSlider("#angleY", {
+  webglLessonsUI.setupSlider("#angleY" + index, {
     value: radToDeg(rotation[1]),
     slide: updateRotation(1),
     max: 360,
   });
-  webglLessonsUI.setupSlider("#angleZ", {
+  webglLessonsUI.setupSlider("#angleZ" + index, {
     value: radToDeg(rotation[2]),
     slide: updateRotation(2),
     max: 360,
-  });
-  webglLessonsUI.setupSlider("#scaleX", {
-    value: scale[0],
-    slide: updateScale(0),
-    min: -5,
-    max: 5,
-    step: 0.01,
-    precision: 2,
-  });
-  webglLessonsUI.setupSlider("#scaleY", {
-    value: scale[1],
-    slide: updateScale(1),
-    min: -5,
-    max: 5,
-    step: 0.01,
-    precision: 2,
-  });
-  webglLessonsUI.setupSlider("#scaleZ", {
-    value: scale[2],
-    slide: updateScale(2),
-    min: -5,
-    max: 5,
-    step: 0.01,
-    precision: 2,
   });
 
   function updatePosition(index) {
@@ -203,13 +139,6 @@ export function scale3D() {
       var angleInDegrees = ui.value;
       var angleInRadians = degToRad(angleInDegrees);
       rotation[index] = angleInRadians;
-      drawScene();
-    };
-  }
-
-  function updateScale(index) {
-    return function (event, ui) {
-      scale[index] = ui.value;
       drawScene();
     };
   }
@@ -258,7 +187,7 @@ export function scale3D() {
     // Draw the geometry.
     var primitiveType = gl.TRIANGLES;
     var offset = 0;
-    var count = 16 * 6;
+    var count = 12 * 3;
     gl.drawArrays(primitiveType, offset, count);
   }
 }
