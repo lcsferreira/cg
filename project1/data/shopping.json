@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Thermic Mug",
+    "price": "$ 9,90",
+    "objHref": "../objects/thermos/termos.obj",
+    "textures": [
+      {
+        "index": "1",
+        "inputColor": "#cd9e58"
+      },
+      {
+        "index": "2",
+        "inputColor": "#5a2f0f"
+      },
+      {
+        "index": "3",
+        "inputColor": "#d0be83"
+      }
+    ]
+  },
+  {
+    "name": "Coffe Mug",
+    "price": "$ 4,90",
+    "objHref": "../objects/mugRed/mug.obj",
+    "textures": [
+      {
+        "index": "1",
+        "inputColor": "#415028"
+      },
+      {
+        "index": "2",
+        "inputColor": "#443020"
+      }
+    ]
+  }
+]

@@ -1,166 +1,353 @@
-"use strict";
-import { shopping } from "../../data/shopping.js";
-import { setGeometry, setColors } from "./geometryColors.js";
-import { m4 } from "./m4.js";
-import { vShader, fShader } from "../shaders/shaderCube.js";
+class Obj {
+  constructor(obj, index) {
+    this.objHref = obj.objHref;
+    this.index = index;
+    this.name = obj.name;
+    this.textures = obj.textures;
+    this.price = obj.price;
+    this.textureIndex = this.textures[0].index;
+    this.cameraTarget;
+    this.cameraPosition;
+    this.yRotation = degToRad(0);
+    this.xRotation = degToRad(0);
 
-const number_objs = shopping.itens.length;
-const NUMBER_OBJS = number_objs;
+    this.insertHTML();
 
-var cardShapes; // html: webgl
+    this.canvas = document.querySelector("#object" + String(index));
+    this.gl = this.canvas.getContext("webgl2");
+    if (!this.gl) {
+      return;
+    }
+    twgl.setAttributePrefix("a_");
+    this.meshProgramInfo = twgl.createProgramInfo(this.gl, [
+      vertexShaderSource,
+      fragmentShaderSource,
+    ]);
 
-var program = null;
-var vao = null;
-var colorAttribLocation = null;
-var positionAttribLocation = null;
-var matrixLocation = null;
+    this.render = this.render.bind(this);
 
-function main(NUMBER_OBJS, shapes) {
-  // cards shapes
-  var gl;
-  for (let i = 0; i < NUMBER_OBJS; ++i) {
-    gl = getGLContext(`object${i}`);
-    program = createProgram(gl, vShader, fShader);
-    setWebGl(gl, program);
-    drawShape(gl, shapes, i);
+    this.main();
   }
 
-  function setWebGl(gl, program) {
-    positionAttribLocation = gl.getAttribLocation(program, "a_position");
-    colorAttribLocation = gl.getAttribLocation(program, "a_color");
-    matrixLocation = gl.getUniformLocation(program, "u_matrix");
+  insertHTML() {
+    var ulOptions = `<ul id="my-select${this.index}" class="horizontal-select">`;
 
-    var positionBuffer = gl.createBuffer();
-    vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    gl.enableVertexAttribArray(positionAttribLocation);
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    setGeometry(gl);
+    this.textures.forEach((texture) => {
+      texture.index == "1"
+        ? (ulOptions += `<li value="${texture.index}" id="op${texture.index}" class="selected" style="background-color: ${texture.inputColor}";></li>`)
+        : (ulOptions += `<li value="${texture.index}" id="op${texture.index}" style="background-color: ${texture.inputColor}";></li>`);
+    });
 
-    var size = 3; // 2 components per iteration
-    var type = gl.FLOAT; // the data is 32bit floats
-    var normalize = false; // don't normalize the data
-    var stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
-    var offset = 0; // start at the beginning of the buffer
-    gl.vertexAttribPointer(
-      positionAttribLocation,
-      size,
-      type,
-      normalize,
-      stride,
-      offset
-    );
+    ulOptions += `</ul>`;
 
-    var colorBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    setColors(gl);
-    gl.enableVertexAttribArray(colorAttribLocation);
-    gl.vertexAttribPointer(
-      colorAttribLocation,
-      3,
-      gl.UNSIGNED_BYTE,
-      true,
-      0,
-      0
-    );
-  }
-}
+    const card = `
+      <div class="item">
+      <div class="object">
+      <canvas width=300 height=300 id="object${String(this.index)}"></canvas>
+        <div class="group">
+        <div>
+        <p>Rotação Y</p>
+        <input type="range" min="0" max="360" id="roty${String(
+          this.index
+        )}" value="0">
+              </div>
+              <div>
+              <p>Rotação X</p>
+              <input type="range" min="0" max="720" id="rotx${String(
+                this.index
+              )}" value="0">
+                </div>
+                <div>
+                <p>Zoom</p>
+                <input type="range" min="0" max="40" id="zoom${String(
+                  this.index
+                )}" value="0">
+            </div>
+          </div>
+        </div>
+        <div class="info">
+          <h2>${this.name} - ${this.price}</h2>
+        </div>
+        <div class="button">
+            <button id="buttonAdd${String(this.index)}">Add to cart</button>
+        </div>
+      </div>
+  `;
 
-function drawShape(gl, shapes, index) {
-  webglUtils.resizeCanvasToDisplaySize(gl.canvas);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    const div = document.createElement("div");
+    div.innerHTML = card.trim();
 
-  gl.clearColor(0, 0, 0, 0); // Clear the canvas
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.enable(gl.DEPTH_TEST);
+    const cardSection = document.getElementById("items");
+    cardSection.appendChild(div.firstChild);
 
-  gl.useProgram(program);
-  gl.bindVertexArray(vao);
+    const button = document.getElementById("buttonAdd" + String(this.index));
+    button.addEventListener("click", () => {
+      addToCart(this.name, this.objHref, this.textureIndex);
+    });
 
-  var matrix = m4.projection(
-    gl.canvas.clientWidth,
-    gl.canvas.clientHeight,
-    500
-  );
-  matrix = m4.translate(
-    matrix,
-    shapes[index].translation[0],
-    shapes[index].translation[1],
-    shapes[index].translation[2]
-  );
-  matrix = m4.xRotate(matrix, shapes[index].rotation[0]);
-  matrix = m4.yRotate(matrix, shapes[index].rotation[1]);
-  matrix = m4.zRotate(matrix, shapes[index].rotation[2]);
-  matrix = m4.scale(
-    matrix,
-    shapes[index].scale[0],
-    shapes[index].scale[1],
-    shapes[index].scale[2]
-  );
+    //inputs range
+    const zoom = document.getElementById("zoom" + String(this.index));
+    zoom.addEventListener("input", () => {
+      const val = parseInt(zoom.value) * -4.3 + 400;
+      this.cameraPosition[2] = val;
+    });
 
-  gl.uniformMatrix4fv(matrixLocation, false, matrix);
+    const rotY = document.getElementById("roty" + String(this.index));
+    rotY.addEventListener("input", () => {
+      const val = degToRad(parseInt(rotY.value));
+      this.yRotation = val;
+    });
 
-  gl.drawArrays(gl.TRIANGLES, 0, 12 * 3);
-}
+    const rotX = document.getElementById("rotx" + String(this.index));
+    rotX.addEventListener("input", () => {
+      const val = degToRad(parseInt(rotX.value));
+      this.xRotation = val;
+    });
 
-function getGLContext(canvas) {
-  var gl = document.getElementById(canvas).getContext("webgl2");
-  if (!gl) {
-    console.log("WebGL não encontrado.");
-    return undefined;
-  }
-  return gl;
-}
+    //select texture
+    let lis = document.querySelectorAll(`#my-select${this.index} li`);
+    lis.forEach((li) => {
+      li.addEventListener("click", () => {
+        lis.forEach((otherLi) => {
+          otherLi.classList.remove("selected");
+        });
+        li.classList.add("selected");
 
-function createProgram(gl, vertex, fragment) {
-  var vShader = createShader(gl, vertex, gl.VERTEX_SHADER);
-  var fShader = createShader(gl, fragment, gl.FRAGMENT_SHADER);
-
-  var program = gl.createProgram();
-  gl.attachShader(program, vShader);
-  gl.attachShader(program, fShader);
-  gl.linkProgram(program);
-  var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-  if (success) return program;
-
-  console.log("Problema com programa WebGL.");
-  console.log(gl.getProgramInfoLog(program));
-  gl.deleteProgram(program);
-  return undefined;
-
-  function createShader(gl, source, type) {
-    var shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (success) return shader;
-
-    console.log(`Problema com Shader WebGL: ${type}.`);
-    console.log(gl.getShaderInfoLog(shader));
-    gl.deleteShader(shader);
-    return undefined;
-  }
-}
-
-function degToRad(d) {
-  return (d * Math.PI) / 180;
-}
-
-function generateShapes(number, mult1, mult2) {
-  var shapes = [];
-  for (let i = 0; i < number; ++i) {
-    shapes.push({
-      translation: [1 * mult1, 1 * mult1, 0],
-      rotation: [degToRad(15 * 75), degToRad(15 * 75), degToRad(15 * 75)],
-      scale: [0.2 * mult2, 0.2 * mult2, 0.2 * mult2],
+        this.textureIndex = li.value;
+        this.loadTexture();
+      });
     });
   }
-  return shapes;
+
+  async main() {
+    const response = await fetch(this.objHref);
+    const text = await response.text();
+    this.obj = parseOBJ(text);
+
+    await this.loadTexture();
+
+    const extents = this.getGeometriesExtents(this.obj.geometries);
+    const range = m4.subtractVectors(extents.max, extents.min);
+    // amount to move the object so its center is at the origin
+    this.objOffset = m4.scaleVector(
+      m4.addVectors(extents.min, m4.scaleVector(range, 0.5)),
+      -1
+    );
+
+    // figure out how far away to move the camera so we can likely
+    // see the object.
+    const radius = 400;
+    this.cameraTarget = [0, 0, 0];
+    this.cameraPosition = m4.addVectors(this.cameraTarget, [0, 0, radius]);
+    // Set zNear and zFar to something hopefully appropriate
+    // for the size of this object.
+    this.zNear = radius / 50;
+    this.zFar = radius * 3;
+
+    requestAnimationFrame(this.render);
+  }
+
+  async loadTexture() {
+    const baseHref = new URL(this.objHref, window.location.href);
+    const matTexts = await Promise.all(
+      this.obj.materialLibs.map(async (filename) => {
+        const matHref = new URL(filename, baseHref).href;
+        const novaString =
+          matHref.substring(0, matHref.indexOf(".mtl")) +
+          this.textureIndex +
+          ".mtl";
+        const response = await fetch(novaString);
+        return await response.text();
+      })
+    );
+    this.materials = parseMTL(matTexts.join("\n"));
+
+    const textures = {
+      defaultWhite: twgl.createTexture(this.gl, { src: [255, 255, 255, 255] }),
+      defaultNormal: twgl.createTexture(this.gl, { src: [127, 127, 255, 0] }),
+    };
+
+    // load texture for materials
+    for (const material of Object.values(this.materials)) {
+      Object.entries(material)
+        .filter(([key]) => key.endsWith("Map"))
+        .forEach(([key, filename]) => {
+          let texture = textures[filename];
+          if (!texture) {
+            const textureHref = new URL(filename, baseHref).href;
+            texture = twgl.createTexture(this.gl, {
+              src: textureHref,
+              flipY: true,
+            });
+            textures[filename] = texture;
+          }
+          material[key] = texture;
+        });
+    }
+
+    // hack the materials so we can see the specular map
+    Object.values(this.materials).forEach((m) => {
+      m.shininess = 25;
+      m.specular = [3, 2, 1];
+    });
+
+    const defaultMaterial = {
+      diffuse: [1, 1, 1],
+      diffuseMap: textures.defaultWhite,
+      normalMap: textures.defaultNormal,
+      ambient: [0, 0, 0],
+      specular: [1, 1, 1],
+      specularMap: textures.defaultWhite,
+      shininess: 200,
+      opacity: 1,
+    };
+
+    this.parts = this.obj.geometries.map(({ material, data }) => {
+      if (data.color) {
+        if (data.position.length === data.color.length) {
+          // it's 3. The our helper library assumes 4 so we need
+          // to tell it there are only 3.
+          data.color = { numComponents: 3, data: data.color };
+        }
+      } else {
+        // there are no vertex colors so just use constant white
+        data.color = { value: [1, 1, 1, 1] };
+      }
+
+      // generate tangents if we have the data to do so.
+      if (data.texcoord && data.normal) {
+        data.tangent = generateTangents(data.position, data.texcoord);
+      } else {
+        // There are no tangents
+        data.tangent = { value: [1, 0, 0] };
+      }
+
+      if (!data.texcoord) {
+        data.texcoord = { value: [0, 0] };
+      }
+
+      if (!data.normal) {
+        // we probably want to generate normals if there are none
+        data.normal = { value: [0, 0, 1] };
+      }
+
+      // create a buffer for each array by calling
+      // gl.createBuffer, gl.bindBuffer, gl.bufferData
+      const bufferInfo = twgl.createBufferInfoFromArrays(this.gl, data);
+      const vao = twgl.createVAOFromBufferInfo(
+        this.gl,
+        this.meshProgramInfo,
+        bufferInfo
+      );
+      return {
+        material: {
+          ...defaultMaterial,
+          ...this.materials[material],
+        },
+        bufferInfo,
+        vao,
+      };
+    });
+  }
+
+  getExtents(positions) {
+    const min = positions.slice(0, 3);
+    const max = positions.slice(0, 3);
+    for (let i = 3; i < positions.length; i += 3) {
+      for (let j = 0; j < 3; ++j) {
+        const v = positions[i + j];
+        min[j] = Math.min(v, min[j]);
+        max[j] = Math.max(v, max[j]);
+      }
+    }
+    return { min, max };
+  }
+
+  getGeometriesExtents(geometries) {
+    return geometries.reduce(
+      ({ min, max }, { data }) => {
+        const minMax = this.getExtents(data.position);
+        return {
+          min: min.map((min, ndx) => Math.min(minMax.min[ndx], min)),
+          max: max.map((max, ndx) => Math.max(minMax.max[ndx], max)),
+        };
+      },
+      {
+        min: Array(3).fill(Number.POSITIVE_INFINITY),
+        max: Array(3).fill(Number.NEGATIVE_INFINITY),
+      }
+    );
+  }
+
+  render() {
+    twgl.resizeCanvasToDisplaySize(this.gl.canvas);
+    this.gl.viewport(0, 0, this.gl.canvas.width, this.gl.canvas.height);
+    this.gl.enable(this.gl.DEPTH_TEST);
+
+    const fieldOfViewRadians = degToRad(60);
+    const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
+    const projection = m4.perspective(
+      fieldOfViewRadians,
+      aspect,
+      this.zNear,
+      this.zFar
+    );
+
+    const up = [0, 1, 0];
+
+    // Compute the camera's matrix using look at.
+    const camera = m4.lookAt(this.cameraPosition, this.cameraTarget, up);
+
+    // Make a view matrix from the camera matrix.
+    const view = m4.inverse(camera);
+
+    const sharedUniforms = {
+      u_lightDirection: m4.normalize([-1.5, 2, 2]),
+      u_view: view,
+      u_projection: projection,
+      u_viewWorldPosition: this.cameraPosition,
+    };
+
+    this.gl.useProgram(this.meshProgramInfo.program);
+
+    // calls gl.uniform
+    twgl.setUniforms(this.meshProgramInfo, sharedUniforms);
+
+    // compute the world matrix once since all parts
+    // are at the same space.
+    let u_world = m4.identity();
+    u_world = m4.translate(u_world, ...this.objOffset);
+    u_world = m4.yRotation(this.yRotation);
+    u_world = m4.multiply(m4.xRotation(this.xRotation), u_world);
+
+    for (const { bufferInfo, vao, material } of this.parts) {
+      // set the attributes for this part.
+      this.gl.bindVertexArray(vao);
+      // calls gl.uniform
+      twgl.setUniforms(
+        this.meshProgramInfo,
+        {
+          u_world,
+        },
+        material
+      );
+      // calls gl.drawArrays or gl.drawElements
+      twgl.drawBufferInfo(this.gl, bufferInfo);
+    }
+    requestAnimationFrame(this.render);
+  }
 }
 
-function start() {
-  cardShapes = generateShapes(NUMBER_OBJS, 125, 1);
-  main(NUMBER_OBJS, cardShapes);
+async function loadObjs() {
+  const response = await fetch("../../../project1/data/shopping.json");
+  const text = await response.text();
+  const objs = JSON.parse(text);
+
+  const arrayObjs = [];
+
+  objs.forEach((obj, indice) => {
+    arrayObjs.push(new Obj(obj, indice));
+  });
 }
 
-start();
+loadObjs();

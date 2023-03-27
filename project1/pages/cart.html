@@ -42,16 +42,9 @@
         </div>
       </div>
       <div class="content">
-        <div class="full-cart" hidden>
-          <canvas id="cart-full-content" width="500" height="500"></canvas>
-          <div id="uiContainer">
-            <div id="ui">
-              <div id="cameraAngle"></div>
-            </div>
-          </div>
+        <div id="cart-conatiner" class="cart">
+          <canvas id="cart"></canvas>
         </div>
-        <div><button onclick="showAllContent()">Show All content</button></div>
-        <div id="items"></div>
         <footer>
           <div class="copyright">
             <small>
@@ -65,8 +58,11 @@
     <script src="https://webgl2fundamentals.org/webgl/resources/m4.js"></script>
     <script src="https://webgl2fundamentals.org/webgl/resources/twgl-full.min.js"></script>
     <script src="https://webgl2fundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
-    <script type="module" src="../scripts/webGl/bg3d2.js"></script>
-    <script type="module" src="../scripts/cart.js"></script>
-    <script type="module" src="../scripts/webGL/object.js"></script>
+    <script type="module" src="../scripts/webGl/bg3d.js"></script>
+    <script src="../scripts/webGL/utils.js"></script>
+    <script src="../scripts/webGL/parseMTL.js"></script>
+    <script src="../scripts/webGL/parseObj.js"></script>
+    <script src="../scripts/webGL/shaderObj.js"></script>
+    <script type="module" src="../scripts/webGL/cart.js"></script>
   </body>
 </html>

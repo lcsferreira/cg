@@ -1,4 +1,4 @@
-export default function parseOBJ(text) {
+function parseOBJ(text) {
   // because indices are base 1 let's just fill in the 0th data
   const objPositions = [[0, 0, 0]];
   const objTexcoords = [[0, 0]];
@@ -99,10 +99,10 @@ export default function parseOBJ(text) {
       }
     },
     s: noop, // smoothing group
-    mtllib(parts, unparsedArgs) {
-      // the spec says there can be multiple filenames here
-      // but many exist with spaces in a single filename
-      materialLibs.push(unparsedArgs);
+    mtllib(parts) {
+      // the spec says there can be multiple file here
+      // but I found one with a space in the filename
+      materialLibs.push(parts.join(" "));
     },
     usemtl(parts, unparsedArgs) {
       material = unparsedArgs;
@@ -150,4 +150,9 @@ export default function parseOBJ(text) {
     geometries,
     materialLibs,
   };
+}
+
+function parseMapArgs(unparsedArgs) {
+  // TODO: handle options
+  return unparsedArgs;
 }
