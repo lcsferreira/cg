@@ -42,8 +42,10 @@ class Obj {
 
     // figure out how far away to move the camera so we can likely
     // see the object.
-    const radius = 400;
-    this.cameraTarget = [0, 0, 0];
+    const radius = 10;
+
+    const random = Math.random() * (10 + 10) - 4;
+    this.cameraTarget = [random, 1, random];
     this.cameraPosition = m4.addVectors(this.cameraTarget, [0, 0, radius]);
     // Set zNear and zFar to something hopefully appropriate
     // for the size of this object.
@@ -248,13 +250,11 @@ async function loadObjs() {
   //load the cart from the local storage
   const cart = JSON.parse(localStorage.getItem("cart"));
   const arrayObjs = [];
-  if (cart) {
-    cart.forEach((item, indice) => {
-      console.log(item);
-      const obj = new Obj(item);
-      arrayObjs.push(new Obj(obj, indice));
-    });
-  }
+  //change the innerHTML of the total
+  document.getElementById("total").innerHTML = `${cart.length}`;
+  cart.forEach((item, indice) => {
+    arrayObjs.push(new Obj(item, indice));
+  });
 }
 
 loadObjs();

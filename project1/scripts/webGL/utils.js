@@ -12,10 +12,11 @@ const addToCart = (itemName, objHref, textureIndex) => {
   obj = {
     name: itemName,
     href: objHref,
-    textureIndex: textureIndex,
+    textureIndex: String(textureIndex),
   };
 
   cart.push(obj);
+  document.getElementById("total").innerHTML = `${cart.length}`;
   //save the cart to local storage
   localStorage.setItem("cart", JSON.stringify(cart));
 };

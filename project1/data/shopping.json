@@ -1,35 +1,96 @@
 [
   {
-    "name": "Thermic Mug",
-    "price": "$ 9,90",
-    "objHref": "../objects/thermos/termos.obj",
+    "name": "Mug 1",
+    "price": "$ 5,00",
+    "objHref": "../objects/mug1/Mug1.obj",
     "textures": [
       {
         "index": "1",
-        "inputColor": "#cd9e58"
+        "inputColor": "black"
       },
       {
         "index": "2",
-        "inputColor": "#5a2f0f"
+        "inputColor": "green"
       },
       {
         "index": "3",
-        "inputColor": "#d0be83"
+        "inputColor": "orange"
       }
     ]
   },
   {
-    "name": "Coffe Mug",
-    "price": "$ 4,90",
-    "objHref": "../objects/mugRed/mug.obj",
+    "name": "Mug 2",
+    "price": "$ 9,90",
+    "objHref": "../objects/mug2/Mug2.obj",
     "textures": [
       {
         "index": "1",
-        "inputColor": "#415028"
+        "inputColor": "yellow"
       },
       {
         "index": "2",
-        "inputColor": "#443020"
+        "inputColor": "red"
+      },
+      {
+        "index": "3",
+        "inputColor": "grey"
+      }
+    ]
+  },
+  {
+    "name": "Mug 3",
+    "price": "$ 15,90",
+    "objHref": "../objects/mug3/Mug3.obj",
+    "textures": [
+      {
+        "index": "1",
+        "inputColor": "cadetblue"
+      },
+      {
+        "index": "2",
+        "inputColor": "purple"
+      },
+      {
+        "index": "3",
+        "inputColor": "darkred"
+      }
+    ]
+  },
+  {
+    "name": "Mug 4",
+    "price": "$ 4,90",
+    "objHref": "../objects/mug4/Mug4.obj",
+    "textures": [
+      {
+        "index": "1",
+        "inputColor": "grey"
+      },
+      {
+        "index": "2",
+        "inputColor": "red"
+      },
+      {
+        "index": "3",
+        "inputColor": "orange"
+      }
+    ]
+  },
+  {
+    "name": "Mug 5",
+    "price": "$ 5,90",
+    "objHref": "../objects/mug5/Mug5.obj",
+    "textures": [
+      {
+        "index": "1",
+        "inputColor": "purple"
+      },
+      {
+        "index": "2",
+        "inputColor": "white"
+      },
+      {
+        "index": "3",
+        "inputColor": "green"
       }
     ]
   }

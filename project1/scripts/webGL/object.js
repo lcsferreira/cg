@@ -45,29 +45,30 @@ class Obj {
       <div class="object">
       <canvas width=300 height=300 id="object${String(this.index)}"></canvas>
         <div class="group">
-        <div>
-        <p>Rotação Y</p>
-        <input type="range" min="0" max="360" id="roty${String(
-          this.index
-        )}" value="0">
-              </div>
-              <div>
-              <p>Rotação X</p>
-              <input type="range" min="0" max="720" id="rotx${String(
-                this.index
-              )}" value="0">
-                </div>
-                <div>
-                <p>Zoom</p>
-                <input type="range" min="0" max="40" id="zoom${String(
-                  this.index
-                )}" value="0">
-            </div>
+          <div>
+            <p>Rotação X</p>
+            <input type="range" min="0" max="360" id="roty${String(
+              this.index
+            )}" value="0">
+          </div>
+          <div>
+            <p>Rotação Y</p>
+            <input type="range" min="0" max="720" id="rotx${String(
+              this.index
+            )}" value="0">
+          </div>
+          <div>
+            <p>Zoom</p>
+            <input type="range" min="0" max="40" id="zoom${String(
+              this.index
+            )}" value="0">
           </div>
         </div>
+      </div>
         <div class="info">
           <h2>${this.name} - ${this.price}</h2>
         </div>
+        ${ulOptions}
         <div class="button">
             <button id="buttonAdd${String(this.index)}">Add to cart</button>
         </div>
@@ -88,7 +89,7 @@ class Obj {
     //inputs range
     const zoom = document.getElementById("zoom" + String(this.index));
     zoom.addEventListener("input", () => {
-      const val = parseInt(zoom.value) * -4.3 + 400;
+      const val = parseInt(zoom.value) * -0.1 + 8;
       this.cameraPosition[2] = val;
     });
 
@@ -136,7 +137,7 @@ class Obj {
 
     // figure out how far away to move the camera so we can likely
     // see the object.
-    const radius = 400;
+    const radius = 8;
     this.cameraTarget = [0, 0, 0];
     this.cameraPosition = m4.addVectors(this.cameraTarget, [0, 0, radius]);
     // Set zNear and zFar to something hopefully appropriate
@@ -344,6 +345,14 @@ async function loadObjs() {
   const objs = JSON.parse(text);
 
   const arrayObjs = [];
+  var cart = JSON.parse(localStorage.getItem("cart"));
+  if (cart == null) {
+    cart = [];
+  } else {
+    cart = JSON.parse(localStorage.getItem("cart"));
+  }
+
+  document.getElementById("total").innerHTML = `${cart.length}`;
 
   objs.forEach((obj, indice) => {
     arrayObjs.push(new Obj(obj, indice));
