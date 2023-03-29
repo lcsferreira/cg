@@ -66,7 +66,7 @@ class Obj {
         </div>
       </div>
         <div class="info">
-          <h2>${this.name} - ${this.price}</h2>
+          <h2>${this.name} - $ ${String(this.price)}</h2>
         </div>
         ${ulOptions}
         <div class="button">
@@ -83,7 +83,7 @@ class Obj {
 
     const button = document.getElementById("buttonAdd" + String(this.index));
     button.addEventListener("click", () => {
-      addToCart(this.name, this.objHref, this.textureIndex);
+      addToCart(this.name, this.objHref, this.textureIndex, this.price);
     });
 
     //inputs range

@@ -44,7 +44,7 @@ class Obj {
     // see the object.
     const radius = 10;
 
-    const random = Math.random() * (10 + 10) - 4;
+    const random = Math.random() * 15;
     this.cameraTarget = [random, 1, random];
     this.cameraPosition = m4.addVectors(this.cameraTarget, [0, 0, radius]);
     // Set zNear and zFar to something hopefully appropriate
@@ -248,13 +248,18 @@ class Obj {
 
 async function loadObjs() {
   //load the cart from the local storage
-  const cart = JSON.parse(localStorage.getItem("cart"));
+  var cart = JSON.parse(localStorage.getItem("cart"));
   const arrayObjs = [];
   //change the innerHTML of the total
+  if (cart == null) {
+    cart = [];
+  }
   document.getElementById("total").innerHTML = `${cart.length}`;
+
   cart.forEach((item, indice) => {
     arrayObjs.push(new Obj(item, indice));
   });
+  totalPrice();
 }
 
 loadObjs();
