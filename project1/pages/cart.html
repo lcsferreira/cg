@@ -18,8 +18,6 @@
     <title>3D shopping</title>
   </head>
   <body>
-    <canvas id="background"></canvas>
-
     <div class="container">
       <div class="header">
         <div class="logo">
@@ -33,7 +31,7 @@
             <li>
               <a href="./cart.html"
                 ><i
-                  class="fa fa-shopping-cart fa-lg cart"
+                  class="fa fa-shopping-cart fa-lg cart-svg"
                   aria-hidden="true"
                 ></i></a
               ><span id="total" class="total">0</span>
@@ -42,11 +40,12 @@
         </div>
       </div>
       <div class="content">
-        <div id="cart-conatiner" class="cart">
-          <canvas id="cart" width="800px" height="600px"></canvas>
-        </div>
         <div class="items-list" id="itemsList">
-          <p>Toal Price: $ <span id="totalPrice"></span></p>
+          <p>Total Price: $ <span id="totalPrice"></span></p>
+        </div>
+        <div id="cart-conatiner" class="cart">
+          <canvas id="BgObj" width="800px" height="600px"></canvas>
+          <canvas id="cart" width="800px" height="600px"></canvas>
         </div>
         <footer>
           <div class="copyright">
@@ -66,6 +65,7 @@
     <script src="../scripts/webGL/parseMTL.js"></script>
     <script src="../scripts/webGL/parseObj.js"></script>
     <script src="../scripts/webGL/shaderObj.js"></script>
+    <script src="../scripts/webGL/bgObj.js"></script>
     <script type="module" src="../scripts/webGL/cart.js"></script>
   </body>
 </html>

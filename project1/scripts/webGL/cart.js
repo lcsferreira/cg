@@ -6,8 +6,10 @@ class Obj {
     this.textureIndex = obj.textureIndex;
     this.cameraTarget;
     this.cameraPosition;
+    //random signal to move the camera
+    this.linePosition = Math.random() > 0.5 ? 1 * index : -1 * index;
     this.yRotation = degToRad(0);
-    this.xRotation = degToRad(0);
+    this.xRotation = degToRad(12);
 
     this.canvas = document.querySelector("#cart");
     this.gl = this.canvas.getContext("webgl2");
@@ -42,11 +44,15 @@ class Obj {
 
     // figure out how far away to move the camera so we can likely
     // see the object.
-    const radius = 10;
+    var radius = 10;
 
-    const random = Math.random() * 15;
-    this.cameraTarget = [random, 1, random];
+    if (this.linePosition > 6 || this.linePosition < -6) {
+      this.linePosition *= 0.8;
+    }
+
+    this.cameraTarget = [this.linePosition, 0, 0];
     this.cameraPosition = m4.addVectors(this.cameraTarget, [0, 0, radius]);
+
     // Set zNear and zFar to something hopefully appropriate
     // for the size of this object.
     this.zNear = radius / 50;
