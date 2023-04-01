@@ -12,6 +12,12 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+img {
+  width: 85%;
+  border-radius: 20px;
+  border: 3px solid var(--dark-color);
+}
+
 #BgObj {
   position: fixed;
   left: 0;
