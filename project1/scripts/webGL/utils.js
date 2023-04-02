@@ -46,3 +46,34 @@ const setRectangle = (gl, x, y, width, height) => {
     gl.STATIC_DRAW
   );
 };
+
+const removeFromCart = (index) => {
+  console.log(index);
+};
+
+const listItems = () => {
+  var cart = JSON.parse(localStorage.getItem("cart"));
+  if (cart == null) {
+    cart = [];
+  } else {
+    cart.forEach((item, index) => {
+      const cardTemplate = `
+      <div class='card-container'>
+      <div>
+      <p>${String(index + 1)}</p>
+      </div>
+      <div>
+      <p>${String(item.name)}</p>
+        </div>
+        <div>
+        <button class='btn-remove' onclick='removeFromCart(${index})'><i class="fa fa-trash fa-lg" aria-hidden="true"></i></button>
+        </div>
+        </div>`;
+
+      const div = document.createElement("div");
+      div.innerHTML = cardTemplate.trim();
+      const divList = document.getElementById("itemsList");
+      divList.appendChild(div.firstChild);
+    });
+  }
+};

@@ -269,3 +269,4 @@ async function loadObjs() {
 }
 
 loadObjs();
+listItems();

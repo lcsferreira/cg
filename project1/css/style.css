@@ -44,10 +44,22 @@ img {
 
 .items-list {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px;
 }
 
-.items-list p {
+.items-list .card-container {
+  display: flex;
+  width: 140px;
+  padding: 10px;
+  justify-content: space-around;
+  background-color: var(--light-color);
+  border: 1px solid var(--highlight);
+  border-radius: 5px;
+}
+
+.total-price {
   margin: 20px;
   font-size: larger;
   background-color: var(--light-color);
@@ -289,6 +301,26 @@ h1 {
   cursor: pointer;
   transform: scale(1.1);
   box-shadow: 0 0 10px var(--dark-color);
+}
+
+.btn-remove {
+  position: relative;
+  color: var(--dark-color);
+  background-color: transparent;
+  border-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 25px;
+  font-size: 15px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-remove:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+  color: var(--highlight);
 }
 
 .full-cart {
