@@ -32,6 +32,8 @@ const totalPrice = () => {
       totalPrice += Number(item.price);
     });
   }
+  //limit the number of decimals
+  totalPrice = totalPrice.toFixed(2);
   document.getElementById("totalPrice").innerHTML = `${totalPrice}`;
 };
 
@@ -49,6 +51,14 @@ const setRectangle = (gl, x, y, width, height) => {
 
 const removeFromCart = (index) => {
   console.log(index);
+  //get the cart from local storage
+  var cart = JSON.parse(localStorage.getItem("cart"));
+  //remove the item from the cart
+  cart.splice(index, 1);
+  //save the cart to local storage
+  localStorage.setItem("cart", JSON.stringify(cart));
+  //reload the page
+  location.reload();
 };
 
 const listItems = () => {
