@@ -191,7 +191,6 @@ export default class Sketch {
   }
 
   settings() {
-    let that = this;
     this.settings = {
       progress: 0,
     };
@@ -227,23 +226,21 @@ export default class Sketch {
     this.material.uniforms.resolution.value.z = a1;
     this.material.uniforms.resolution.value.w = a2;
 
-    // optional - cover width
-    const dist = this.camera.position.z;
-    const height = 1;
-    this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
+    // // optional - cover width
+    // const dist = this.camera.position.z;
+    // const height = 1;
+    // this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
 
-    // if(w/h > 1) {
-    //   this.plane.scale.x = this.camera.aspect;
-    // } else {
-    //   this.plane.scale.y = 1/this.camera.aspect;
-    // }
+    // // if(w/h > 1) {
+    // //   this.plane.scale.x = this.camera.aspect;
+    // // } else {
+    // //   this.plane.scale.y = 1/this.camera.aspect;
+    // // }
 
     this.camera.updateProjectionMatrix();
   }
 
   addObjects() {
-    let that = this;
-
     this.material = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable",
