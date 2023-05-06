@@ -1,8 +1,6 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "dat.gui";
-import gsap from "gsap";
-import matcap from "./imgs/sol.png";
+import matcap from "./imgs/orange.png";
 import matcap1 from "./imgs/bluesphere.png";
 
 const fragment = `uniform float time;
@@ -43,8 +41,8 @@ return (m * vec4(v, 1.0)).xyz;
 //função para suavizar as bordas dos objetos
 float smin( float a, float b, float k )
 {
-    float h = a-b;
-    return 0.5*( (a+b) - sqrt(h*h+k) );
+  float h = clamp( 0.5+0.5*(b-a)/k, 0.0, 1.0 );
+  return mix( b, a, h ) - k*h*(1.0-h);
 }
 
 //funções de distância (distance functions) para os objetos
@@ -59,27 +57,52 @@ float sdBox( vec3 p, vec3 b )
   return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
+float rand(vec2 co){
+  return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 //side distance function (sdf) para a cena inteira
-float sdf(vec3 p){
+vec2 sdf(vec3 p){
+  float type = 0.;
   vec3 p1 = rotate(p, vec3(1.), time/5.);
-  float box = sdBox(p1, vec3(0.3));
-  float sphere =  sdSphere(p - vec3(mouse, 0.0), 0.2);
-  return smin(box, sphere, 0.01);
+
+  float box = smin(sdBox(p1, vec3(0.2)),sdSphere(p, 0.2), 0.3);
+
+  float realsphere = sdSphere(p1, 0.3);
+  float final = mix(box, realsphere, progress);
+
+  for(float i =0.;i<10.; i++){
+    float randOffset = rand(vec2(i, 0.));
+    float progr = 1. - fract(time/2.  + randOffset);
+    vec3 pos = vec3(sin(randOffset*PI*2.), cos(randOffset*PI*2.), 5);
+    float gotoCenter = sdSphere(p - pos*progr, 0.1);
+    final = smin(final, gotoCenter, 0.3);
+  }
+
+
+  float mouseSphere =  sdSphere(p - vec3(mouse*resolution.zw*3., 0.), 0.2);
+
+  if(mouseSphere < final) type = 1.;
+
+  return vec2(smin(final, mouseSphere, 0.4), type);
 }
 
 //função para calcular a normal de um ponto para iluminar a cena
-vec3 getNormal(vec3 pos){
-  vec2 eps = vec2(0.001, 0.0);
-  vec3 nor = vec3(
-    sdf(pos+eps.xyy) - sdf(pos-eps.xyy),
-    sdf(pos+eps.yxy) - sdf(pos-eps.yxy),
-    sdf(pos+eps.yyx) - sdf(pos-eps.yyx)
-  );
-  return normalize(nor);
+vec3 getNormal(in vec3 p){
+  const float eps = 0.0001;
+  const vec2 h = vec2(eps, 0);
+
+  return normalize(vec3(
+    sdf(p + h.xyy).x - sdf(p - h.xyy).x,
+    sdf(p + h.yxy).x - sdf(p - h.yxy).x,
+    sdf(p + h.yyx).x - sdf(p - h.yyx).x
+  ));
 }
 
 
 void main(){
+  float dist = length(vUv - vec2(0.5));
+  vec3 bg = mix(vec3(0.3), vec3(0.0), dist);
   vec2 newUV = (vUv - vec2 (0.5))*resolution.zw + vec2(0.5);
 
   //rayDir é o vetor normalizado que aponta para o pixel
@@ -90,33 +113,42 @@ void main(){
   vec2 ratioVector = vector * (resolution.zw);
   //vetor na resolução da tela
 
-  vec3 camPos = vec3(0., 0., 2.);
+  vec3 camPos = vec3(0., 0., 3.);
   vec3 rayDir = normalize(vec3(ratioVector, -1));
 
   vec3 rayPos = camPos;
   float t = 0.0;
   float tMax = 5.0;
+  float type = -1.;
 
-
-  for(int i = 0; i < 256; ++i){
+  for(int i = 0; i < 1024; ++i){
     vec3 pos = camPos + t*rayDir;
-    float d = sdf(pos);
-    if(d < 0.001 || t>tMax) break;
+    float d = sdf(pos).x;
+    type = sdf(pos).y;
+    if(d < 0.0001 || t>tMax) break;
     t += d;
   }
 
-  vec3 color = vec3(0.);
+  vec3 color = bg;
   if(t<tMax){
     //aqui é onde acertamos um objeto
     vec3 pos = camPos + t*rayDir;
-    color = vec3(1.);
     vec3 normal = getNormal(pos);
 
-    //iluminação
-    float diff = dot(vec3(1.), normal);
+    //iluminação, cor e textura
+    float diff = dot(vec3(1), normal);
     vec2 matcapUV = getMatcap(rayDir, normal);
-    // color = vec3(matcapUV, 0.0);
-    color = texture2D(matcap, matcapUV).rgb;
+    // color = vec3(matcapUV, 0.7);
+
+    if(type < 0.5){
+      color = texture2D(matcap, matcapUV).rgb;
+    }else{
+      color = texture2D(matcap1, matcapUV).rgb;
+    }
+
+    float fresnel = pow(0.5 + dot(rayDir, normal), 1.0);
+
+    color = mix(color, bg,fresnel);
   }
   
   gl_FragColor = vec4(color, 1.0);
@@ -129,7 +161,6 @@ attribute vec3 aCoordinates;
 void main(){
   vUv = uv;
   vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-  gl_PointSize = 1000.0 * (1.0 / - mvPosition.z);
   gl_Position = projectionMatrix * mvPosition;
 
   vCoordinates = aCoordinates.xy;
@@ -147,19 +178,19 @@ export default class Sketch {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0xeeeeee, 1);
     this.renderer.physicallyCorrectLights = true;
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.container.appendChild(this.renderer.domElement);
 
     this.camera = new THREE.PerspectiveCamera(
       70,
       window.innerWidth / window.innerHeight,
-      0.001,
+      0.1,
       1000
     );
 
     var frustumSize = 1;
-    var aspect = window.innerWidth / window.innerHeight;
+
     this.camera = new THREE.OrthographicCamera(
       frustumSize / -2,
       frustumSize / 2,
@@ -170,7 +201,7 @@ export default class Sketch {
     );
 
     this.camera.position.set(0, 0, 2);
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
     this.time = 0;
 
     this.isPlaying = true;
@@ -180,6 +211,8 @@ export default class Sketch {
     this.render();
     this.setupResize();
     this.mouseEvents();
+
+    this.settings();
   }
 
   mouseEvents() {
@@ -248,6 +281,7 @@ export default class Sketch {
       side: THREE.DoubleSide,
       uniforms: {
         time: { value: 0 },
+        progress: { value: 0 },
         mouse: { value: new THREE.Vector2(0, 0) },
         matcap: { value: new THREE.TextureLoader().load(matcap) },
         matcap1: { value: new THREE.TextureLoader().load(matcap1) },
@@ -276,8 +310,9 @@ export default class Sketch {
   render() {
     if (!this.isPlaying) return;
 
-    this.time += 0.05;
+    this.time += 0.01;
     this.material.uniforms.time.value = this.time;
+    this.material.uniforms.progress.value = this.settings.progress;
     if (this.mouse) {
       this.material.uniforms.mouse.value = this.mouse;
     }
