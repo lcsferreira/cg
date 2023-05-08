@@ -1,12 +1,14 @@
 import * as THREE from "three";
 import * as dat from "dat.gui";
-import matcap from "./imgs/orange.png";
-import matcap1 from "./imgs/bluesphere.png";
+import matcap from "./imgs/darkmatter.png";
+import matcap1 from "./imgs/fosco.jpg";
+import matcap2 from "./imgs/darkmatter.png";
 
 const fragment = `uniform float time;
 uniform float progress;
 uniform vec2 mouse;
-uniform sampler2D matcap, matcap1;
+uniform float fire;
+uniform sampler2D matcap, matcap1, matcap2;
 uniform vec4 resolution;
 varying vec2 vUv;
 float PI = 3.141592653589793238;
@@ -61,30 +63,66 @@ float rand(vec2 co){
   return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+vec3 GetColorAmount(vec3 p, vec2 matcapUV){
+  float amount = clamp((7. - length(p))/6., 0., 0.3);
+  vec3 col = 0.5 + 0.5*cos(6.28318*vec3(0.00, 0.25, 0.25)+amount+vec3(0.00, 0.25, 0.25));
+  // vec3 col = texture2D(matcap, matcapUV).rgb;
+  return col*amount;
+}
+
 //side distance function (sdf) para a cena inteira
 vec2 sdf(vec3 p){
   float type = 0.;
   vec3 p1 = rotate(p, vec3(1.), time/5.);
 
-  float box = smin(sdBox(p1, vec3(0.2)),sdSphere(p, 0.2), 0.3);
+  float s = 0.3 + 0.01*cos(time/0.5) + 0.02*cos(time/0.5);
+  float box = smin(sdBox(p1, vec3(s)),sdSphere(p, s), s);
 
   float realsphere = sdSphere(p1, 0.3);
   float final = mix(box, realsphere, progress);
 
-  for(float i =0.;i<10.; i++){
-    float randOffset = rand(vec2(i, 0.));
-    float progr = 1. - fract(time/2.  + randOffset);
-    vec3 pos = vec3(sin(randOffset*PI*2.), cos(randOffset*PI*2.), 5);
-    float gotoCenter = sdSphere(p - pos*progr, 0.1);
-    final = smin(final, gotoCenter, 0.3);
+  float randOffset = rand(vec2(0.06, 0.07));
+  
+  float progr = 1. - fract(-(fire*2.5)/1.5  +randOffset);
+  float progr2 = 1. - fract(time/2.  - randOffset);
+  float progr2inv = 1.*fract(time/2.  - randOffset);
+
+
+  vec3 pos = vec3(mouse*4., 0.);
+  float gotoCenter = sdSphere(p - pos*progr, 0.05);
+  
+  vec3 p2 = rotate(p, vec3(1.), time/2.);
+  vec3 p3 = rotate(p, vec3(1.), time/1.5);
+  vec3 p4 = rotate(p, vec3(1.), time/3.);
+
+  for(float i = 1.; i <= 30.; i++){
+    vec3 randomVec3 = mix(-vec3(4.0), vec3(4.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
+
+    if(mod(i, 3.) == 0.){
+      final = smin(final, sdSphere(p2 - randomVec3*progr2, 0.1), 0.1);
+    } else if (mod(i, 3.) == 1.){
+      final = smin(final, sdSphere(p4 - randomVec3*progr2, 0.1), 0.1);
+    } else {
+      final = smin(final, sdSphere(p3 - randomVec3*progr2, 0.1), 0.1);
+    }
+  }
+  
+  for(float i = 1.; i <= 30.; i++){
+    vec3 randomVec3 = mix(-vec3(4.0), vec3(4.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
+
+    if(mod(i, 3.) == 0.){
+      final = smin(final, sdSphere(p2 - randomVec3*progr2inv, 0.1), 0.1);
+    } else if (mod(i, 3.) == 1.){
+      final = smin(final, sdSphere(p4 - randomVec3*progr2inv, 0.1), 0.1);
+    } else {
+      final = smin(final, sdSphere(p3 - randomVec3*progr2inv, 0.1), 0.1);
+    }
   }
 
-
   float mouseSphere =  sdSphere(p - vec3(mouse*resolution.zw*3., 0.), 0.2);
-
   if(mouseSphere < final) type = 1.;
 
-  return vec2(smin(final, mouseSphere, 0.4), type);
+  return vec2(smin(final, mouseSphere, 0.5), type);
 }
 
 //função para calcular a normal de um ponto para iluminar a cena
@@ -99,10 +137,10 @@ vec3 getNormal(in vec3 p){
   ));
 }
 
-
 void main(){
   float dist = length(vUv - vec2(0.5));
-  vec3 bg = mix(vec3(0.3), vec3(0.0), dist);
+  vec3 bg = mix(vec3(0.), vec3(0.), dist);
+  bg = mix(vec3(0.4, 0.1, 0.2), bg, 0.8);
   vec2 newUV = (vUv - vec2 (0.5))*resolution.zw + vec2(0.5);
 
   //rayDir é o vetor normalizado que aponta para o pixel
@@ -111,10 +149,10 @@ void main(){
 
   vec2 vector = (vUv - vec2(0.5));
   vec2 ratioVector = vector * (resolution.zw);
-  //vetor na resolução da tela
 
-  vec3 camPos = vec3(0., 0., 3.);
-  vec3 rayDir = normalize(vec3(ratioVector, -1));
+  //vetor na resolução da tela
+  vec3 camPos = vec3(0., 0., 2.);
+  vec3 rayDir = normalize(vec3(ratioVector, -1.));
 
   vec3 rayPos = camPos;
   float t = 0.0;
@@ -132,26 +170,35 @@ void main(){
   vec3 color = bg;
   if(t<tMax){
     //aqui é onde acertamos um objeto
-    vec3 pos = camPos + t*rayDir;
-    vec3 normal = getNormal(pos);
-
     //iluminação, cor e textura
-    float diff = dot(vec3(1), normal);
+    
+    vec3 pos = camPos + t*rayDir;
+    rayDir += 0.6*sdf(pos).x;
+
+    vec3 normal = getNormal(pos);
+    float diff = dot(vec3(0.5), normal);
+
+    // float diff = dot(normal, vec3(-1., -1., -1.));
+    
+    // color = mix(vec3(0.), vec3(1.), diff);
+
+    
     vec2 matcapUV = getMatcap(rayDir, normal);
-    // color = vec3(matcapUV, 0.7);
+    // if(type < 0.5){
+    //   color = texture2D(matcap, matcapUV).rgb;
+    // }else{
+    //   color = texture2D(matcap, matcapUV).rgb;
+    // }
 
-    if(type < 0.5){
-      color = texture2D(matcap, matcapUV).rgb;
-    }else{
-      color = texture2D(matcap1, matcapUV).rgb;
-    }
+    // color = mix(color, vec3(0.), 0.);
+    
+    color += 3.*GetColorAmount(pos, matcapUV);
+    float fresnel = pow(0.3 + dot(rayDir, normal), 1.0);
+    color = mix(color, bg, diff);
 
-    float fresnel = pow(0.5 + dot(rayDir, normal), 1.0);
-
-    color = mix(color, bg,fresnel);
   }
   
-  gl_FragColor = vec4(color, 1.0);
+  gl_FragColor = vec4(color, 1.);
 }`;
 
 const vertex = `varying vec2 vUv;
@@ -169,7 +216,6 @@ void main(){
 export default class Sketch {
   constructor(options) {
     this.scene = new THREE.Scene();
-
     this.container = options.dom;
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
@@ -205,7 +251,8 @@ export default class Sketch {
     this.time = 0;
 
     this.isPlaying = true;
-
+    this.audio = new Audio();
+    this.audio.volume;
     this.addObjects();
     this.resize();
     this.render();
@@ -221,11 +268,36 @@ export default class Sketch {
       this.mouse.x = event.pageX / this.width - 0.5;
       this.mouse.y = -event.pageY / this.height + 0.5;
     });
+
+    document.addEventListener("click", (event) => {
+      let mousex = event.pageX / this.width - 0.5;
+      let mousey = -event.pageY / this.height + 0.5;
+      this.fire(mousex, mousey);
+    });
+  }
+
+  fire(mousex, mousey) {
+    if (this.settings.fire > 0) return;
+    //get the distance between the mouse and the center of the screen
+    let dist = Math.sqrt(mousex * mousex + mousey * mousey);
+
+    //set the fire to the distance
+    this.settings.fire = dist;
+
+    //subtact the distance each frame to make the fire go out
+    let interval = setInterval(() => {
+      this.settings.fire -= 0.003;
+      if (this.settings.fire < 0) {
+        this.settings.fire = 0;
+        clearInterval(interval);
+      }
+    }, 10);
   }
 
   settings() {
     this.settings = {
       progress: 0,
+      fire: 0,
     };
     this.gui = new dat.GUI();
     this.gui.add(this.settings, "progress", 0, 1, 0.01);
@@ -259,17 +331,6 @@ export default class Sketch {
     this.material.uniforms.resolution.value.z = a1;
     this.material.uniforms.resolution.value.w = a2;
 
-    // // optional - cover width
-    // const dist = this.camera.position.z;
-    // const height = 1;
-    // this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
-
-    // // if(w/h > 1) {
-    // //   this.plane.scale.x = this.camera.aspect;
-    // // } else {
-    // //   this.plane.scale.y = 1/this.camera.aspect;
-    // // }
-
     this.camera.updateProjectionMatrix();
   }
 
@@ -282,9 +343,13 @@ export default class Sketch {
       uniforms: {
         time: { value: 0 },
         progress: { value: 0 },
+        texture: { value: new THREE.TextureLoader().load(matcap) },
+        fire: { value: 0 },
+        audioValue: { value: 0 },
         mouse: { value: new THREE.Vector2(0, 0) },
         matcap: { value: new THREE.TextureLoader().load(matcap) },
         matcap1: { value: new THREE.TextureLoader().load(matcap1) },
+        matcap2: { value: new THREE.TextureLoader().load(matcap2) },
         resolution: { value: new THREE.Vector4() },
       },
       vertexShader: vertex,
@@ -313,6 +378,10 @@ export default class Sketch {
     this.time += 0.01;
     this.material.uniforms.time.value = this.time;
     this.material.uniforms.progress.value = this.settings.progress;
+
+    this.material.uniforms.fire.value = this.settings.fire;
+    this.material.uniforms.texture.value = this.settings.texture;
+    this.material.uniforms.audioValue.value = this.audio.volume;
     if (this.mouse) {
       this.material.uniforms.mouse.value = this.mouse;
     }
