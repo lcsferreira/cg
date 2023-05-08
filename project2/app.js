@@ -2,12 +2,12 @@ import * as THREE from "three";
 import * as dat from "dat.gui";
 import matcap from "./imgs/darkmatter.png";
 import matcap1 from "./imgs/fosco.jpg";
-import matcap2 from "./imgs/darkmatter.png";
+import matcap2 from "./imgs/orange.png";
 
 const fragment = `uniform float time;
 uniform float progress;
+uniform bool pulsing;
 uniform vec2 mouse;
-uniform float fire;
 uniform sampler2D matcap, matcap1, matcap2;
 uniform vec4 resolution;
 varying vec2 vUv;
@@ -65,8 +65,8 @@ float rand(vec2 co){
 
 vec3 GetColorAmount(vec3 p, vec2 matcapUV){
   float amount = clamp((7. - length(p))/6., 0., 0.3);
-  vec3 col = 0.5 + 0.5*cos(6.28318*vec3(0.00, 0.25, 0.25)+amount+vec3(0.00, 0.25, 0.25));
-  // vec3 col = texture2D(matcap, matcapUV).rgb;
+  // vec3 col = 0.5 + 0.5*cos(6.28318*vec3(0.00, 0.25, 0.25)+amount+vec3(0.00, 0.25, 0.25));
+  vec3 col = texture2D(matcap2, matcapUV).rgb;
   return col*amount;
 }
 
@@ -74,48 +74,49 @@ vec3 GetColorAmount(vec3 p, vec2 matcapUV){
 vec2 sdf(vec3 p){
   float type = 0.;
   vec3 p1 = rotate(p, vec3(1.), time/5.);
+  float s = 0.3;
 
-  float s = 0.3 + 0.01*cos(time/0.5) + 0.02*cos(time/0.5);
+  if(pulsing){
+    s = 0.3 + 0.02*cos(time/0.5) + 0.05*cos(time/0.5);
+  }
+
   float box = smin(sdBox(p1, vec3(s)),sdSphere(p, s), s);
 
-  float realsphere = sdSphere(p1, 0.3);
+  float realsphere = sdSphere(p1, s);
   float final = mix(box, realsphere, progress);
 
   float randOffset = rand(vec2(0.06, 0.07));
   
-  float progr = 1. - fract(-(fire*2.5)/1.5  +randOffset);
   float progr2 = 1. - fract(time/2.  - randOffset);
   float progr2inv = 1.*fract(time/2.  - randOffset);
 
-
   vec3 pos = vec3(mouse*4., 0.);
-  float gotoCenter = sdSphere(p - pos*progr, 0.05);
   
   vec3 p2 = rotate(p, vec3(1.), time/2.);
   vec3 p3 = rotate(p, vec3(1.), time/1.5);
   vec3 p4 = rotate(p, vec3(1.), time/3.);
 
   for(float i = 1.; i <= 30.; i++){
-    vec3 randomVec3 = mix(-vec3(4.0), vec3(4.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
+    vec3 randomVec3 = mix(-vec3(1.0), vec3(1.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
 
     if(mod(i, 3.) == 0.){
-      final = smin(final, sdSphere(p2 - randomVec3*progr2, 0.1), 0.1);
+      final = smin(final, sdSphere(p2 - randomVec3, 0.1), 0.1);
     } else if (mod(i, 3.) == 1.){
-      final = smin(final, sdSphere(p4 - randomVec3*progr2, 0.1), 0.1);
+      final = smin(final, sdSphere(p4 - randomVec3, 0.1), 0.1);
     } else {
-      final = smin(final, sdSphere(p3 - randomVec3*progr2, 0.1), 0.1);
+      final = smin(final, sdSphere(p3 - randomVec3, 0.1), 0.1);
     }
   }
   
   for(float i = 1.; i <= 30.; i++){
-    vec3 randomVec3 = mix(-vec3(4.0), vec3(4.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
+    vec3 randomVec3 = mix(-vec3(1.0), vec3(1.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
 
     if(mod(i, 3.) == 0.){
-      final = smin(final, sdSphere(p2 - randomVec3*progr2inv, 0.1), 0.1);
+      final = smin(final, sdSphere(p2 - randomVec3, 0.1), 0.1);
     } else if (mod(i, 3.) == 1.){
-      final = smin(final, sdSphere(p4 - randomVec3*progr2inv, 0.1), 0.1);
+      final = smin(final, sdSphere(p4 - randomVec3, 0.1), 0.1);
     } else {
-      final = smin(final, sdSphere(p3 - randomVec3*progr2inv, 0.1), 0.1);
+      final = smin(final, sdSphere(p3 - randomVec3, 0.1), 0.1);
     }
   }
 
@@ -177,24 +178,20 @@ void main(){
 
     vec3 normal = getNormal(pos);
     float diff = dot(vec3(0.5), normal);
-
-    // float diff = dot(normal, vec3(-1., -1., -1.));
-    
-    // color = mix(vec3(0.), vec3(1.), diff);
-
     
     vec2 matcapUV = getMatcap(rayDir, normal);
     // if(type < 0.5){
-    //   color = texture2D(matcap, matcapUV).rgb;
+    //   color = texture2D(matcap1, matcapUV).rgb;
     // }else{
     //   color = texture2D(matcap, matcapUV).rgb;
     // }
 
-    // color = mix(color, vec3(0.), 0.);
     
-    color += 3.*GetColorAmount(pos, matcapUV);
-    float fresnel = pow(0.3 + dot(rayDir, normal), 1.0);
+    color += 2.*GetColorAmount(pos, matcapUV);
+    float fresnel = pow(0.3 + dot(rayDir, normal), 2.0);
+    color = mix(color, bg, fresnel);
     color = mix(color, bg, diff);
+
 
   }
   
@@ -268,39 +265,16 @@ export default class Sketch {
       this.mouse.x = event.pageX / this.width - 0.5;
       this.mouse.y = -event.pageY / this.height + 0.5;
     });
-
-    document.addEventListener("click", (event) => {
-      let mousex = event.pageX / this.width - 0.5;
-      let mousey = -event.pageY / this.height + 0.5;
-      this.fire(mousex, mousey);
-    });
-  }
-
-  fire(mousex, mousey) {
-    if (this.settings.fire > 0) return;
-    //get the distance between the mouse and the center of the screen
-    let dist = Math.sqrt(mousex * mousex + mousey * mousey);
-
-    //set the fire to the distance
-    this.settings.fire = dist;
-
-    //subtact the distance each frame to make the fire go out
-    let interval = setInterval(() => {
-      this.settings.fire -= 0.003;
-      if (this.settings.fire < 0) {
-        this.settings.fire = 0;
-        clearInterval(interval);
-      }
-    }, 10);
   }
 
   settings() {
     this.settings = {
       progress: 0,
-      fire: 0,
+      pulsing: false,
     };
     this.gui = new dat.GUI();
-    this.gui.add(this.settings, "progress", 0, 1, 0.01);
+    this.gui.add(this.settings, "progress", 0, 5, 0.01);
+    this.gui.add(this.settings, "pulsing");
   }
 
   setupResize() {
@@ -343,9 +317,7 @@ export default class Sketch {
       uniforms: {
         time: { value: 0 },
         progress: { value: 0 },
-        texture: { value: new THREE.TextureLoader().load(matcap) },
-        fire: { value: 0 },
-        audioValue: { value: 0 },
+        pulsing: { value: false },
         mouse: { value: new THREE.Vector2(0, 0) },
         matcap: { value: new THREE.TextureLoader().load(matcap) },
         matcap1: { value: new THREE.TextureLoader().load(matcap1) },
@@ -378,10 +350,8 @@ export default class Sketch {
     this.time += 0.01;
     this.material.uniforms.time.value = this.time;
     this.material.uniforms.progress.value = this.settings.progress;
+    this.material.uniforms.pulsing.value = this.settings.pulsing;
 
-    this.material.uniforms.fire.value = this.settings.fire;
-    this.material.uniforms.texture.value = this.settings.texture;
-    this.material.uniforms.audioValue.value = this.audio.volume;
     if (this.mouse) {
       this.material.uniforms.mouse.value = this.mouse;
     }
