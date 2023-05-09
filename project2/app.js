@@ -7,9 +7,11 @@ import matcap2 from "./imgs/orange.png";
 const fragment = `uniform float time;
 uniform float progress;
 uniform bool pulsing;
-uniform vec2 mouse;
+uniform vec3 mouse;
 uniform sampler2D matcap, matcap1, matcap2;
 uniform vec4 resolution;
+uniform float redAmount;
+float brightness;
 varying vec2 vUv;
 float PI = 3.141592653589793238;
 
@@ -59,6 +61,12 @@ float sdBox( vec3 p, vec3 b )
   return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
+float sdTorus( vec3 p, vec2 t )
+{
+  vec2 q = vec2(length(p.xz)-t.x,p.y);
+  return length(q)-t.y;
+}
+
 float rand(vec2 co){
   return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -66,64 +74,42 @@ float rand(vec2 co){
 vec3 GetColorAmount(vec3 p, vec2 matcapUV){
   float amount = clamp((7. - length(p))/6., 0., 0.3);
   // vec3 col = 0.5 + 0.5*cos(6.28318*vec3(0.00, 0.25, 0.25)+amount+vec3(0.00, 0.25, 0.25));
-  vec3 col = texture2D(matcap2, matcapUV).rgb;
-  return col*amount;
+  vec3 col = vec3(redAmount, 0., 0.);
+  // vec3 col = texture2D(matcap2, matcapUV).rgb;
+  return col*5.*amount;
 }
 
 //side distance function (sdf) para a cena inteira
 vec2 sdf(vec3 p){
   float type = 0.;
-  vec3 p1 = rotate(p, vec3(1.), time/5.);
-  float s = 0.3;
+  float dynamicRotation = length(vec3(mouse.xy*resolution.zw*2., mouse.z) - vec3(0.));
+  vec3 p1 = rotate(p, vec3(1.), time/dynamicRotation);
+  vec3 py = rotate(p, vec3(6., 0., 1.), time/dynamicRotation);
+  vec3 px = rotate(p, vec3(3., 1., 3.), time/dynamicRotation);
+  float s1 = 0.3 + 0.08*cos(time/dynamicRotation) + 0.01*cos(time/dynamicRotation);
+  float s2 = 0.2 + 0.1*cos(time/dynamicRotation) + 0.01*cos(time/dynamicRotation);
+  vec3 pxinv = rotate(p, vec3(-3., 2., -3.), time/dynamicRotation);
 
-  if(pulsing){
-    s = 0.3 + 0.02*cos(time/0.5) + 0.05*cos(time/0.5);
-  }
+  float torus = sdTorus(p1, vec2(s1, 0.005));
+  float torus2 = sdTorus(py, vec2(s2, 0.005));
+  float torus3 = sdTorus(px, vec2(0.3, 0.005));
+  float torus4 = sdTorus(p1, vec2(s2, 0.005));
+  float torus5 = sdTorus(px, vec2(0.3, 0.005));
+  float torus6 = sdTorus(pxinv, vec2(0.35, 0.005));
+  float sphere = sdSphere(p, 0.05);
 
-  float box = smin(sdBox(p1, vec3(s)),sdSphere(p, s), s);
+  float final = smin(torus, torus3, 0.02);
+  final = smin(final, torus, 0.02);
+  final = smin(final, torus2, 0.02);
+  final = smin(final, torus4, 0.02);
+  final = smin(final, torus5, 0.02);
+  final = smin(final, torus6, 0.02);
+  final = smin(final, sphere, 0.02);
 
-  float realsphere = sdSphere(p1, s);
-  float final = mix(box, realsphere, progress);
-
-  float randOffset = rand(vec2(0.06, 0.07));
-  
-  float progr2 = 1. - fract(time/2.  - randOffset);
-  float progr2inv = 1.*fract(time/2.  - randOffset);
-
-  vec3 pos = vec3(mouse*4., 0.);
-  
-  vec3 p2 = rotate(p, vec3(1.), time/2.);
-  vec3 p3 = rotate(p, vec3(1.), time/1.5);
-  vec3 p4 = rotate(p, vec3(1.), time/3.);
-
-  for(float i = 1.; i <= 30.; i++){
-    vec3 randomVec3 = mix(-vec3(1.0), vec3(1.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
-
-    if(mod(i, 3.) == 0.){
-      final = smin(final, sdSphere(p2 - randomVec3, 0.1), 0.1);
-    } else if (mod(i, 3.) == 1.){
-      final = smin(final, sdSphere(p4 - randomVec3, 0.1), 0.1);
-    } else {
-      final = smin(final, sdSphere(p3 - randomVec3, 0.1), 0.1);
-    }
-  }
-  
-  for(float i = 1.; i <= 30.; i++){
-    vec3 randomVec3 = mix(-vec3(1.0), vec3(1.0), fract(vec3(rand(vec2(i, 0.0)), rand(vec2(0.0, i)), rand(vec2(i, i*0.5)))));
-
-    if(mod(i, 3.) == 0.){
-      final = smin(final, sdSphere(p2 - randomVec3, 0.1), 0.1);
-    } else if (mod(i, 3.) == 1.){
-      final = smin(final, sdSphere(p4 - randomVec3, 0.1), 0.1);
-    } else {
-      final = smin(final, sdSphere(p3 - randomVec3, 0.1), 0.1);
-    }
-  }
-
-  float mouseSphere =  sdSphere(p - vec3(mouse*resolution.zw*3., 0.), 0.2);
+  float mouseSphere =  sdSphere(p - vec3(mouse.xy*resolution.zw*2., mouse.z), 0.03);
   if(mouseSphere < final) type = 1.;
 
-  return vec2(smin(final, mouseSphere, 0.5), type);
+  return vec2(smin(final, mouseSphere, 0.15), type);
 }
 
 //função para calcular a normal de um ponto para iluminar a cena
@@ -139,9 +125,10 @@ vec3 getNormal(in vec3 p){
 }
 
 void main(){
+  float brightness = length(vec3(abs(mouse.xy*resolution.zw*2.), mouse.z) - vec3(0.));
   float dist = length(vUv - vec2(0.5));
-  vec3 bg = mix(vec3(0.), vec3(0.), dist);
-  bg = mix(vec3(0.4, 0.1, 0.2), bg, 0.8);
+  vec3 bg = mix(vec3(0., 0., 0.2), vec3(0.), dist);
+  // bg = mix(vec3(0.4, 0.1, 0.2), bg, 0.8);
   vec2 newUV = (vUv - vec2 (0.5))*resolution.zw + vec2(0.5);
 
   //rayDir é o vetor normalizado que aponta para o pixel
@@ -177,7 +164,7 @@ void main(){
     rayDir += 0.6*sdf(pos).x;
 
     vec3 normal = getNormal(pos);
-    float diff = dot(vec3(0.5), normal);
+    float diff = dot(vec3(0.1), normal);
     
     vec2 matcapUV = getMatcap(rayDir, normal);
     // if(type < 0.5){
@@ -187,10 +174,11 @@ void main(){
     // }
 
     
-    color += 2.*GetColorAmount(pos, matcapUV);
+    color += (1.-brightness)*GetColorAmount(pos, matcapUV);
     float fresnel = pow(0.3 + dot(rayDir, normal), 2.0);
-    color = mix(color, bg, fresnel);
     color = mix(color, bg, diff);
+    // color = mix(color, bg, diff);
+    color = mix(color, vec3(0.4, 6., 6.), fresnel);
 
 
   }
@@ -229,7 +217,7 @@ export default class Sketch {
       70,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      2000
     );
 
     var frustumSize = 1;
@@ -260,21 +248,41 @@ export default class Sketch {
   }
 
   mouseEvents() {
-    this.mouse = new THREE.Vector2();
+    this.mouse = new THREE.Vector3();
     document.addEventListener("mousemove", (event) => {
       this.mouse.x = event.pageX / this.width - 0.5;
       this.mouse.y = -event.pageY / this.height + 0.5;
+      this.adjustBrightnessAndGetRed();
     });
+    //add a scroll event listener
+    document.addEventListener("wheel", (event) => {
+      //get the direction of the scroll
+      let scrollDirection = event.deltaY > 0 ? 1 : -1;
+      //this. mouse.z is the amount of scroll
+      this.mouse.z += scrollDirection * 0.05;
+      this.adjustBrightnessAndGetRed();
+    });
+  }
+
+  adjustBrightnessAndGetRed() {
+    //calculate the amount of red based on mouse x, y and z
+    let redAmount =
+      Math.abs(this.mouse.x) + Math.abs(this.mouse.y) + this.mouse.z;
+    // more red when mouse is in the center
+    redAmount = 1 - 2 * redAmount;
+    //adjust the brightness of the scene based on the amount of red
+    this.settings.redAmount = redAmount;
+    this.settings.brightness = 8 + redAmount * 8;
   }
 
   settings() {
     this.settings = {
       progress: 0,
       pulsing: false,
+      redAmount: 0,
+      brightness: 0,
     };
     this.gui = new dat.GUI();
-    this.gui.add(this.settings, "progress", 0, 5, 0.01);
-    this.gui.add(this.settings, "pulsing");
   }
 
   setupResize() {
@@ -318,7 +326,9 @@ export default class Sketch {
         time: { value: 0 },
         progress: { value: 0 },
         pulsing: { value: false },
-        mouse: { value: new THREE.Vector2(0, 0) },
+        redAmount: { value: 0 },
+        brightness: { value: 0 },
+        mouse: { value: new THREE.Vector3(0, 0, 0) },
         matcap: { value: new THREE.TextureLoader().load(matcap) },
         matcap1: { value: new THREE.TextureLoader().load(matcap1) },
         matcap2: { value: new THREE.TextureLoader().load(matcap2) },
@@ -351,6 +361,8 @@ export default class Sketch {
     this.material.uniforms.time.value = this.time;
     this.material.uniforms.progress.value = this.settings.progress;
     this.material.uniforms.pulsing.value = this.settings.pulsing;
+    this.material.uniforms.redAmount.value = this.settings.redAmount;
+    this.material.uniforms.brightness.value = this.settings.brightness;
 
     if (this.mouse) {
       this.material.uniforms.mouse.value = this.mouse;
