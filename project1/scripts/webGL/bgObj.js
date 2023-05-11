@@ -1,7 +1,7 @@
 "use strict";
 
 var image = new Image();
-image.src = "../../../project1/objects/bgCoffe.jpeg"; // MUST BE SAME DOMAIN!!!
+image.src = "../../../../objects/bgCoffe.jpeg"; // MUST BE SAME DOMAIN!!!
 image.onload = function () {
   render(image);
 };
