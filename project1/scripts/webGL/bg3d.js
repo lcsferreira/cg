@@ -235,7 +235,7 @@ class Background {
 }
 
 async function loadBackground() {
-  const background = new Background("../../../project1/objects/mug1/Mug1.obj");
+  const background = new Background("../../../../objects/mug1/Mug1.obj");
 }
 
 loadBackground();
