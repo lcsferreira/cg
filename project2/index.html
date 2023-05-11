@@ -7,6 +7,7 @@
       content="width=device-width, shrink-to-fit=0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <title>Projeto RayMarching</title>
+    <link rel="icon" type="image/x-icon" href="./favicon.png" />
     <style>
       body {
         overscroll-behavior: none;
@@ -26,6 +27,11 @@
     </style>
   </head>
   <body>
+    <audio controls loop autoplay style="display: none">
+      <source src="./spacenoise.ogg" type="audio/ogg" />
+      <source src="./spacenoise.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
     <div id="container"></div>
     <script type="module" src="./app.js"></script>
   </body>
