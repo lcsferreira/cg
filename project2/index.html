@@ -27,7 +27,13 @@
     </style>
   </head>
   <body>
-    <audio id="player" autoplay controls style="display: none">
+    <audio
+      id="player"
+      loop
+      autoplay
+      controls
+      style="display: block; position: fixed; z-index: -11"
+    >
       <source src="spacenoise.mp3" type="audio/mp3" />
     </audio>
     <div id="container"></div>
