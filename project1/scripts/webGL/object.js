@@ -340,7 +340,7 @@ class Obj {
 }
 
 async function loadObjs() {
-  const response = await fetch("../../../project1/data/shopping.json");
+  const response = await fetch("../../../../data/shopping.json");
   const text = await response.text();
   const objs = JSON.parse(text);
 
