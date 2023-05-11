@@ -24,19 +24,20 @@
       canvas {
         display: block;
       }
+      audio {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <audio
-      id="player"
-      loop
-      autoplay
-      controls
-      style="display: block; position: fixed; z-index: -11"
-    >
+    <audio loop="true" autoplay="autoplay" controls="controls" id="vid" muted>
       <source src="spacenoise.mp3" type="audio/mp3" />
     </audio>
     <div id="container"></div>
     <script type="module" src="./app.js"></script>
+    <script>
+      let vid = document.getElementById("vid");
+      vid.muted = false;
+    </script>
   </body>
 </html>
